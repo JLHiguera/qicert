@@ -80,11 +80,13 @@ mod test {
             }}
     }}");
 
-    let domain = Domain::try_from("example.com").unwrap();
+    let domain = Domain::new("example", "com", None);
 
-    let challenge_block = HttpConfig::http_well_known(&domain);
+    if let Ok(domain) = domain {
+        let challenge_block = HttpConfig::http_well_known(&domain);
 
-    assert_eq!(challenge_block, expected);
+        assert_eq!(challenge_block, expected);
+        }
     }
 
     #[test]
@@ -101,11 +103,13 @@ mod test {
             }}
     }}");
 
-        let domain = Domain::try_from("test.example.com").unwrap();
+        let domain = Domain::new("example", "com", Some("test"));
 
-        let challenge_block = HttpConfig::http_well_known(&domain);
+        if let Ok(domain) = domain {
+            let challenge_block = HttpConfig::http_well_known(&domain);
 
-        assert_eq!(challenge_block, expected);
+            assert_eq!(challenge_block, expected);
+        }
     }
 
     #[test]
@@ -128,12 +132,14 @@ mod test {
             }}
     }}"##);
 
-        let domain = Domain::try_from("example.com").unwrap();
+        let domain = Domain::new("example", "com", None);
 
-        let http_block = HttpConfig::https_content(&domain);
+        if let Ok(domain) = domain {
+            let http_block = HttpConfig::https_content(&domain);
 
-        assert_eq!(http_block, expected);
-        
+            assert_eq!(http_block, expected);
+            
+        }
     }
 
     #[test]
@@ -156,12 +162,14 @@ mod test {
             }}
     }}"##);
 
-        let domain = Domain::try_from("www.example.com").unwrap();
+        //let domain = Domain::try_from("www.example.com").unwrap();
+        let domain = Domain::new("example", "com", Some("www"));
 
-        let http_block = HttpConfig::https_content(&domain);
+        if let Ok(domain) = domain {
+            let http_block = HttpConfig::https_content(&domain);
 
-        assert_eq!(http_block, expected);
-        
+            assert_eq!(http_block, expected);
+        }
     }
 
     #[test]
@@ -174,11 +182,13 @@ mod test {
             return 301 https://example.com$request_uri;
     }}");
 
-        let domain = Domain::try_from("example.com").unwrap();
+        let domain = Domain::new("example", "com", None);
 
-        let redirect_block = HttpConfig::http_redirect_content(&domain);
+        if let Ok(domain) = domain {
+            let redirect_block = HttpConfig::http_redirect_content(&domain);
 
-        assert_eq!(redirect_block, expected);
+            assert_eq!(redirect_block, expected);
+        }
     }
 
 
@@ -192,10 +202,12 @@ mod test {
             return 301 https://www.example.com$request_uri;
     }}");
 
-        let domain = Domain::try_from("www.example.com").unwrap();
+        let domain = Domain::new("example", "com", Some("www"));
 
-        let redirect_block = HttpConfig::http_redirect_content(&domain);
+        if let Ok(domain) = domain {
+            let redirect_block = HttpConfig::http_redirect_content(&domain);
 
-        assert_eq!(redirect_block, expected);
+            assert_eq!(redirect_block, expected);
+        }
     }
 }

@@ -24,7 +24,7 @@ fn main() -> Result<(), Box<dyn Error>>{
 
     let subdomain = get_subdomain();
 
-    let domain = Domain::new(name, tld, subdomain)?;
+    let domain = Domain::new(name, tld, subdomain.as_deref())?;
 
     Configurator::append_or_create(&domain)?;
 
