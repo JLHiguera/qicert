@@ -15,36 +15,35 @@ use std::error::Error;
 use crate::domain::Domain;
 use crate::configurator::Configurator;
 
+use clap::Parser;
+
+#[derive(Parser)]
+#[command(name = "qicert")]
+#[command(author = "Jose Higuera <jose@higuera.dev>")]
+#[command(about = "A very simple tool built as a wrapper on top of certbot 
+    with nginx and manual certification in mind")]
+#[command(version, long_about = None)]
+struct Cli {
+    #[arg(short = 'd', long)]
+    domain: String,
+
+    #[arg(short = 's', long)]
+    subdomain: Option<String>,
+
+    #[arg(short = 't', long)]
+    tld: String,
+}
+
 fn main() -> Result<(), Box<dyn Error>>{
-    let name = get_domain();
+    let cli = Cli::parse();
 
-    //let domain = Domain::try_from(name.as_str())?;
-
-    let tld = get_tld();
-
-    let subdomain = get_subdomain();
+    let name = cli.domain;
+    let tld = cli.tld;
+    let subdomain = cli.subdomain; 
 
     let domain = Domain::new(name, tld, subdomain.as_deref())?;
 
     Configurator::append_or_create(&domain)?;
 
     Ok(())
-}
-
-fn get_domain() -> String {
-    match std::env::args().nth(1) {
-        Some(domain) => domain,
-        None => panic!("Domain name is missing")
-    }
-}
-
-fn get_tld() -> String {
-    match std::env::args().nth(2) {
-        Some(tld) => tld,
-        None => panic!("tld is missing"),
-    }
-}
-
-fn get_subdomain() -> Option<String> {
-    std::env::args().nth(3)
 }
