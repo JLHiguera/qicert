@@ -195,7 +195,7 @@ mod test {
             (Domain::new("example", "com", None), true),
             (Domain::new("example", "com", Some("www")), false),
             (Domain::new("Example", "com", None), true),
-            (Domain::new("example", "com", None), true),
+            (Domain::new("example", "COM", None), true),
             (Domain::new("www", "example", None), false),
         ];
 
