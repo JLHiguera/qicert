@@ -19,7 +19,7 @@ use clap::Parser;
 
 #[derive(Parser)]
 #[command(name = "qicert")]
-#[command(author = "Jose Higuera <jose@higuera.dev>")]
+#[command(author = "Jose Higuera <contact@higuera.dev>")]
 #[command(about = "A very simple tool built as a wrapper on top of certbot 
     with nginx and manual certification in mind")]
 #[command(version, long_about = None)]
