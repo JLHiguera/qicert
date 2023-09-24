@@ -36,11 +36,13 @@ impl SubDomain {
 impl FromStr for SubDomain {
     type Err = DomainError;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if ! Self::is_valid(s) {
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        let value = value.to_lowercase();
+
+        if ! Self::is_valid(&value) {
             return Err(Self::Err::InvalidSubdomain);
         }
 
-        Ok(Self(s.to_string()))
+        Ok(Self(value))
     }
 }

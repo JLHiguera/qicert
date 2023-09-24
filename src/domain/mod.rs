@@ -22,7 +22,6 @@ pub enum DomainError {
 
 impl Display for DomainError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        //write!(f, "{}", self)
         match self {
             Self::MissingTld => write!(f, "The Domain has no TLD"),
             Self::InvalidName => write!(f, "Invalid domain name"),
@@ -251,7 +250,13 @@ mod test {
 
         let tld = Tld::from_str("net");
 
-        let subdomain = SubDomain::from_str("www");
+        let subdomain = SubDomain::from_str("wwW");
+
+        assert!(domain_name.is_ok());
+
+        assert!(tld.is_ok());
+
+        assert!(subdomain.is_ok());
 
         if let (Ok(domain_name), Ok(tld), Ok(subdomain)) = (domain_name, tld, subdomain) {
             assert_eq!(domain_name.to_string(), "example");
