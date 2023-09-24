@@ -1,4 +1,10 @@
+mod domain_name;
+mod subdomain;
+mod tld;
+
 use std::{fmt::Display, error::Error, str::FromStr};
+
+use crate::domain::{domain_name::DomainName, tld::Tld, subdomain::SubDomain};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Domain {
@@ -23,165 +29,6 @@ impl Display for DomainError {
             Self::InvalidSubdomain => write!(f, "The subdomain given is invalid"),
             Self::InvalidTld => write!(f, "The TLD is invalid"),
         }
-    }
-}
-
-#[derive(Debug)]
-struct SubDomain(String);
-
-impl Display for SubDomain {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl SubDomain {
-    fn is_valid(subdomain: &str) -> bool {
-        if subdomain.is_empty() {
-            return false;
-        }
-
-        if subdomain.starts_with('.') || subdomain.ends_with('.') {
-            return false;
-        }
-
-        if subdomain.starts_with('-') || subdomain.ends_with('-') {
-            return false;
-        }
-
-        subdomain.chars().all(Self::is_valid_char)
-    }
-
-    fn is_valid_char(char: char) -> bool {
-        matches!(char, 'a'..='z' | '0'..='9' | '.' | '-')
-    }
-}
-
-#[derive(Debug)]
-struct DomainName(String);
-
-impl DomainName {
-    fn is_valid_char(char: char) -> bool {
-        matches!(char, 'a'..='z' | '0'..='9' | '-')
-    }
-
-    fn is_valid(name: &str) -> bool {
-        if name.is_empty() {
-            return false;
-        }
-
-        if name.starts_with('-') | name.ends_with('-') {
-            return false;
-        }
-
-        name.chars().all(Self::is_valid_char)
-    }
-}
-
-impl Display for DomainName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl FromStr for DomainName {
-    type Err = DomainError;
-
-    fn from_str(value: &str) -> Result<Self, Self::Err> {
-        let value = value.to_lowercase();
-
-        if ! Self::is_valid(value.as_str()) {
-            return Err(Self::Err::InvalidName);
-        }
-
-        Ok(Self(value))
-    }
-}
-
-impl std::ops::Add<Tld> for DomainName {
-    type Output = Domain;
-
-    fn add(self, rhs: Tld) -> Self::Output {
-        let name = self;
-
-        Self::Output {
-            name: name.0,
-            tld: rhs.to_string(),
-            subdomain: None,
-        }
-    }
-}
-
-
-#[derive(Debug)]
-struct Tld(String);
-
-impl Display for Tld {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl Tld {
-    fn get(&self) -> String {
-        self.0.to_owned()
-    }
-
-    // fn new(value: String) -> Self {
-    //     Self(value)
-    // }
-
-    fn is_valid<S: AsRef<str>>(value: S) -> bool {
-        fn inner(value: &str) -> bool {
-            if value.is_empty() {
-                return false;
-            }
-
-            if value.starts_with('.') || value.ends_with('.') {
-                return false;
-            }
-
-
-            value.chars().all(Tld::is_valid_char)
-        }
-
-        inner(value.as_ref())
-    }
-
-    fn is_valid_char(char: char) -> bool {
-        matches!(char,  'a'..='z' | '0'..='9'| '.')
-    }
-}
-#[derive(Debug)]
-enum TldError {
-    InvalidCharset,
-    TooShort,
-}
-
-impl Display for TldError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::InvalidCharset => write!(f, "The TLD has an invalid character"),
-            Self::TooShort => write!(f, "The TLD is too short"),
-        }
-    }
-}
-
-impl FromStr for Tld {
-    type Err = TldError;
-
-    fn from_str(value: &str) -> Result<Self, Self::Err> {
-        let value = value.to_lowercase();
-
-        if value.len() < 2 {
-            return Err(Self::Err::TooShort);
-        }
-
-        if ! Self::is_valid(value.as_str()) {
-            return Err(Self::Err::InvalidCharset);
-        }
-
-        Ok(Self(value))
     }
 }
 
@@ -247,6 +94,20 @@ impl Domain {
     
     pub fn conf_file_name(&self) -> String {
         format!("{}.{}.conf", self.name, self.tld)
+    }
+}
+
+impl std::ops::Add<Tld> for DomainName {
+    type Output = Domain;
+
+    fn add(self, rhs: Tld) -> Self::Output {
+        let name = self;
+
+        Self::Output {
+            name: name.get_name(),
+            tld: rhs.to_string(),
+            subdomain: None,
+        }
     }
 }
 
