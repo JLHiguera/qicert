@@ -1,6 +1,8 @@
-use std::fmt::Display;
+use std::{fmt::Display, str::FromStr};
 
-#[derive(Debug)]
+use super::DomainError;
+
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct SubDomain(String);
 
 impl Display for SubDomain {
@@ -28,5 +30,17 @@ impl SubDomain {
 
     fn is_valid_char(char: char) -> bool {
         matches!(char, 'a'..='z' | '0'..='9' | '.' | '-')
+    }
+}
+
+impl FromStr for SubDomain {
+    type Err = DomainError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if ! Self::is_valid(s) {
+            return Err(Self::Err::InvalidSubdomain);
+        }
+
+        Ok(Self(s.to_string()))
     }
 }

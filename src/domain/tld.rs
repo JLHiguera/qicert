@@ -1,6 +1,6 @@
 use std::{str::FromStr, fmt::Display};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Tld(String);
 
 impl Display for Tld {

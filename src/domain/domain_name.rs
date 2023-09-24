@@ -3,7 +3,7 @@ use std::{fmt::Display, str::FromStr, ops::Deref};
 use super::DomainError;
 
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct DomainName(String);
 
 impl DomainName {

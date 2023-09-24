@@ -8,9 +8,9 @@ use crate::domain::{domain_name::DomainName, tld::Tld, subdomain::SubDomain};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Domain {
-    name: String,
-    tld: String,
-    subdomain: Option<String>,
+    name: DomainName,
+    tld: Tld,
+    subdomain: Option<SubDomain>,
 }
 #[derive(Debug)]
 pub enum DomainError {
@@ -37,25 +37,17 @@ impl Error for DomainError {}
 impl Domain {
     pub fn new<S: AsRef<str>>(name: S, tld: S, subdomain: Option<&str>) -> Result<Self, DomainError> {
         fn inner(name: &str, tld: &str, subdomain: Option<&str>) -> Result<Domain, DomainError> {
-            if ! DomainName::is_valid(name) {
-                return Err(DomainError::InvalidName);
-            }
+            let name = DomainName::from_str(name)?;
 
-            if ! Tld::is_valid(tld) {
-                return Err(DomainError::InvalidTld);
-            }
-
+            let tld = Tld::from_str(tld)
+                .map_err(|_| DomainError::InvalidTld)?;
+            
             let subdomain = match subdomain {
-                Some(sub) if SubDomain::is_valid(&sub) => Some(sub.to_owned()),
-                Some(_) => return Err(DomainError::InvalidSubdomain),
+                Some(sub) => Some(SubDomain::from_str(sub)?),
                 None => None,
             };
 
-            let domain = Domain {
-                name: name.to_owned(), 
-                tld: tld.to_owned(), 
-                subdomain: subdomain,
-            };
+            let domain = Domain::from_parts(name, tld, subdomain);
 
             Ok(domain)
         }
@@ -63,16 +55,22 @@ impl Domain {
         inner(name.as_ref(), tld.as_ref(), subdomain)
     }
 
+    pub fn from_parts(name: DomainName, tld: Tld, subdomain: Option<SubDomain>) -> Self {
+        Self {
+            name, tld, subdomain
+        }
+    }
+
     #[cfg(test)]
     pub fn new_unchecked<S: AsRef<str>>(name: S, tld: S, subdomain: Option<&str>) -> Self {
         Self::new(name.as_ref(), tld.as_ref(), subdomain.as_deref()).unwrap()
     }
 
-    pub fn get_name(&self) -> String {
-        self.name.to_owned()
+    pub fn get_name(&self) -> DomainName {
+        self.name.clone()
     }
 
-    pub fn get_tld(&self) -> String {
+    pub fn get_tld(&self) -> Tld {
         self.tld.to_owned()
     }
 
@@ -84,8 +82,8 @@ impl Domain {
         self.subdomain.is_some()
     }
 
-    fn get_subdomain(&self) -> Option<String> {
-        self.subdomain.clone()
+    fn get_subdomain(&self) -> Option<SubDomain> {
+        self.subdomain.to_owned()
     }
 
     fn is_valid_char(char: char) -> bool {
@@ -104,8 +102,8 @@ impl std::ops::Add<Tld> for DomainName {
         let name = self;
 
         Self::Output {
-            name: name.get_name(),
-            tld: rhs.to_string(),
+            name: name,
+            tld: rhs,
             subdomain: None,
         }
     }
