@@ -225,4 +225,46 @@ mod test {
             }
         }
     }
+
+    #[test]
+    fn build_from_struct_parts_without_subdomain() {
+        let expected_domain = Domain::new_unchecked("example", "net", None);
+        let expected_string: String = "example.net".into();
+
+        let domain_name = DomainName::from_str("example");
+
+        let tld = Tld::from_str("net");
+
+        if let (Ok(domain_name), Ok(tld)) = (domain_name, tld) {
+            let domain = Domain::from_parts(domain_name, tld, None);
+
+            assert_eq!(domain, expected_domain);
+
+            assert_eq!(domain.to_string(), expected_string);
+        }
+    }
+    
+    #[test]
+    fn build_from_parts_with_subdomain() {
+        let expected_domain = Domain::new_unchecked("example", "net", Some("www"));
+        let expected_string: String = "www.example.net".into();
+
+        let domain_name = DomainName::from_str("example");
+
+        let tld = Tld::from_str("net");
+
+        let subdomain = SubDomain::from_str("www");
+
+        if let (Ok(domain_name), Ok(tld), Ok(subdomain)) = (domain_name, tld, subdomain) {
+            assert_eq!(domain_name.to_string(), "example");
+
+            assert_eq!(tld.to_string(), "net");
+
+            let domain = Domain::from_parts(domain_name, tld, Some(subdomain));
+
+            assert_eq!(domain, expected_domain);
+
+            assert_eq!(domain.to_string(), expected_string);
+        }
+    }
 }
