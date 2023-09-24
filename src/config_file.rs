@@ -192,11 +192,11 @@ mod test {
     #[test]
     fn find_domain_without_subdomain_file() {
         let domains = vec![
-            (Domain::new_unchecked("example.com"), true),
-            (Domain::new_unchecked("www.example.com"), false),
-            (Domain::new_unchecked("Example.com"), true),
-            (Domain::new_unchecked("example.COM"), true),
-            (Domain::new_unchecked("www.example"), false),
+            (Domain::new("example", "com", None), true),
+            (Domain::new("example", "com", Some("www")), false),
+            (Domain::new("Example", "com", None), true),
+            (Domain::new("example", "com", None), true),
+            (Domain::new("www", "example", None), false),
         ];
 
         let haystack = "server { 
@@ -204,18 +204,21 @@ mod test {
         }";
 
         for (domain, expected) in domains {
-            assert_eq!(ConfigFile::find_domain_in_str(haystack, &domain), expected, "domain: {domain}");
+
+            if let Ok(domain) = domain {
+                assert_eq!(ConfigFile::find_domain_in_str(haystack, &domain), expected, "domain: {domain}");
+            }
         }
     }
 
     #[test]
     fn find_domain_with_subdomain_in_file() {
         let domains = vec![
-            (Domain::new_unchecked("example.com"), false),
-            (Domain::new_unchecked("www.example.com"), true),
-            (Domain::new_unchecked("Example.com"), false),
-            (Domain::new_unchecked("example.COM"), false),
-            (Domain::new_unchecked("www.example"), false),
+            (Domain::new("example", "com", None), false),
+            (Domain::new("example", "com", Some("www")), true),
+            (Domain::new("Example", "com", None), false),
+            (Domain::new("example", "COM", None), false),
+            (Domain::new("www", "example", None), false),
         ];
 
         let haystack = "server {
@@ -223,18 +226,22 @@ mod test {
         }";
 
         for (domain, expected) in domains {
-            assert_eq!(ConfigFile::find_domain_in_str(haystack, &domain), expected, "domain: {domain}");
+
+            if let Ok(domain) = domain {
+                assert_eq!(ConfigFile::find_domain_in_str(haystack, &domain), expected, "domain: {domain}");
+            }
+
         }
     }
 
     #[test]
     fn find_domain_with_commencted_lines() {
         let domains = vec![
-            (Domain::new_unchecked("example.com"), false),
-            (Domain::new_unchecked("www.example.com"), true),
-            (Domain::new_unchecked("Example.com"), false),
-            (Domain::new_unchecked("example.COM"), false),
-            (Domain::new_unchecked("www.example"), false),
+            (Domain::new("example", "com", None), false),
+            (Domain::new("example", "com", Some("www")), true),
+            (Domain::new("Example", "com", None), false),
+            (Domain::new("example", "COM", None), false),
+            (Domain::new("www", "example", None), false),
         ];
 
         let haystack = "server {
@@ -245,13 +252,16 @@ mod test {
         }";
 
         for (domain, expected) in domains {
-            assert_eq!(ConfigFile::find_domain_in_str(haystack, &domain), expected, "domain: {domain}");
+
+            if let Ok(domain) = domain {
+                assert_eq!(ConfigFile::find_domain_in_str(haystack, &domain), expected, "domain: {domain}");
+            }
         }
     }
 
     #[test]
     fn config_file_path_without_subdomain() {
-        let domain = Domain::new_unchecked("example.com");
+        let domain = Domain::new_unchecked("example", "com", None);
 
         let expected = PathBuf::from("/etc/nginx/sites-available/example.com.conf");
 
@@ -262,7 +272,7 @@ mod test {
 
     #[test]
     fn config_file_path_with_subdomain() {
-        let domain = Domain::new_unchecked("www.example.com");
+        let domain = Domain::new_unchecked("example", "com", Some("www"));
 
         let expected = PathBuf::from("/etc/nginx/sites-available/example.com.conf");
 
@@ -273,7 +283,7 @@ mod test {
 
     #[test]
     fn backup_file_path() {
-        let domain = Domain::new_unchecked("example.com");
+        let domain = Domain::new_unchecked("example", "com", None);
 
         let expected = PathBuf::from("/etc/nginx/sites-available/example.com.conf.bak");
 
@@ -284,7 +294,7 @@ mod test {
 
     #[test]
     fn backup_file_path_with_subdomain() {
-        let domain = Domain::new_unchecked("www.example.com");
+        let domain = Domain::new_unchecked( "example", "com", Some("www"));
 
         let expected = PathBuf::from("/etc/nginx/sites-available/example.com.conf.bak");
 

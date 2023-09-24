@@ -64,8 +64,8 @@ impl Domain {
     }
 
     #[cfg(test)]
-    pub fn new_unchecked(domain: &str) -> Self {
-        Self::from_str(domain).unwrap()
+    pub fn new_unchecked<S: AsRef<str>>(name: S, tld: S, subdomain: Option<&str>) -> Self {
+        Self::new(name.as_ref(), tld.as_ref(), subdomain.as_deref()).unwrap()
     }
 
     pub fn get_name(&self) -> String {
@@ -111,15 +111,6 @@ impl std::ops::Add<Tld> for DomainName {
     }
 }
 
-#[cfg(test)]
-impl TryFrom<&str> for Domain {
-    type Error = DomainError;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        Self::from_str(value)
-    }
-}
-
 impl Display for Domain {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match &self.subdomain {
@@ -130,76 +121,8 @@ impl Display for Domain {
 }
 
 #[cfg(test)]
-impl FromStr for Domain {
-    type Err = DomainError;
-
-    fn from_str(domain: &str) -> Result<Self, Self::Err> {
-        let domain = domain.to_lowercase();
-
-        if domain.len() < 4 || !domain.chars().all(Self::is_valid_char) {
-            return Err(DomainError::InvalidName);
-        }
-
-        let parts: Vec<&str> = domain.split('.').collect();
-        
-        if parts.iter().any(|s| s.is_empty()) {
-            return Err(DomainError::InvalidName);
-        }
-
-        //FIXME: remove unwraps
-        //FIXME: This only works for single word TLDs.
-        match parts.len() {
-            0 | 1 => Err(DomainError::MissingTld                                                    ),
-            2 => Ok(Self { name: parts.first().unwrap().to_string(), 
-                tld: parts.last().unwrap().to_string(),
-                subdomain: None}),
-            3 => Ok (Self {
-                subdomain: Some(parts.first().unwrap().to_string()),
-                name: parts.get(1).unwrap().to_string(),
-                tld: parts.get(2).unwrap().to_string(),
-            }),
-            _ => Err(DomainError::InvalidName),
-        }
-    }
-}
-
-#[cfg(test)]
 mod test {
     use super::*;
-
-    #[test]
-    fn test_domain_from_str() {
-        let domains = vec![
-            ("example.com", true),
-            ("example.com ", false),
-            ("www.example.com", true),
-            (".", false),
-            ("..", false),
-            ("...", false),
-            ("....", false),
-            (".....", false),
-            (".......", false),
-            ("a.a", false),
-            ("#.#", false),
-            ("a.com", true),
-            ("a#.com", false),
-            ("#a.com", false),
-            ("a!#@().com", false),
-            ("abc.!#@()com", false),
-            ("abc.com!#@()", false),
-            ("", false),
-            ("ww w.example.com", false),
-            ("www. example.com", false),
-            ("www.example .com", false),
-            ("www.example. com", false),
-            (r#"www.example.\ com"#, false),
-
-        ];
-
-        for (domain, expected) in domains {
-            assert_eq!(Domain::try_from(domain).is_ok(), expected, "\n TESTING domain as {} and {}", domain, expected)
-        };
-    }
 
     #[test]
     fn build_from_parts() {
@@ -222,7 +145,7 @@ mod test {
 
     #[test]
     fn build_from_parts_str() {
-        let expected = Domain::new_unchecked("example.com");
+        let expected = Domain::new_unchecked("example", "com", None);
 
         let domain = Domain::new("example", "com", None);
 

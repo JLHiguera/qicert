@@ -135,7 +135,7 @@ mod test {
     fn expected_path() {
         let expected_path = PathBuf::from("/var/www/example.com/public");
 
-        let domain = Domain::try_from("example.com").unwrap();
+        let domain = Domain::new("example", "com", None).unwrap();
 
         let webroot = WebRoot::build_pathbuf(&domain);
 
