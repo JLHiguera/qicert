@@ -82,10 +82,12 @@ mod test {
             ("com.ca", true),
             ("com.ca.", false),
             ("com-ca", false),
+            ("com ca", false),
             ("COM", true),
             ("a", false),
             ("1", false),
             ("!net#$@", false),
+            ("", false),
         ];
 
         for (value, expected) in tlds {
