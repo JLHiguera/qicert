@@ -14,10 +14,6 @@ impl Tld {
         self.0.to_owned()
     }
 
-    // fn new(value: String) -> Self {
-    //     Self(value)
-    // }
-
     pub fn is_valid<S: AsRef<str>>(value: S) -> bool {
         fn inner(value: &str) -> bool {
             if value.is_empty() {
@@ -69,5 +65,54 @@ impl FromStr for Tld {
         }
 
         Ok(Self(value))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn valid_tld_from_str() {
+        let tlds = vec![
+            ("com", true),
+            ("com.", false),
+            (".com", false),
+            (".net.", false),
+            ("com.ca", true),
+            ("com.ca.", false),
+            ("com-ca", false),
+            ("COM", true),
+            ("a", false),
+            ("1", false),
+            ("!net#$@", false),
+        ];
+
+        for (value, expected) in tlds {
+            let tld = Tld::from_str(value);
+
+            assert_eq!(tld.is_ok(), expected, "value used: {value} with expected result: {expected}");
+        }
+    }
+
+    #[test]
+    fn valid_tld_matches_expected_str() {
+        let tlds = vec![
+            ("net", "net"),
+            ("NET", "net"),
+            ("Net", "net"),
+            ("nET", "net"),
+            ("EDU.cA", "edu.ca"),
+        ];
+
+        for (value, expected) in tlds {
+            let tld = Tld::from_str(value);
+
+            assert!(tld.is_ok());
+
+            if let Ok(tld) = tld  {
+                assert_eq!(tld.to_string(), expected);
+            }
+        }
     }
 }
