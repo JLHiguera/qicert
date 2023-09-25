@@ -46,3 +46,53 @@ impl FromStr for SubDomain {
         Ok(Self(value))
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn valid_subdomain_from_str() {
+        let subdomains = vec![
+            ("www", true),
+            ("www1", true),
+            ("ww w", false),
+            ("1wa1", true),
+            ("tes!t", false),
+            (".www", false),
+            ("www.", false),
+            (".www.", false),
+            ("w@w", false),
+            ("multiple.parts", true),
+            ("multiple.part.", false),
+            ("", false),
+            ("'", false),
+        ];
+
+        for (value, expected) in subdomains {
+            let subdomain = SubDomain::from_str(value);
+
+            assert_eq!(subdomain.is_ok(), expected);
+        }
+    }
+
+    #[test]
+    fn valid_subdomain_matches_expected_str() {
+        let subdomains = vec![
+            ("WwW", "www"),
+            ("wwW1", "www1"),
+            ("TESTING.sub", "testing.sub"),
+            ("TeStInG", "testing"),
+        ];
+
+        for (value, expected) in subdomains {
+            let subdomain = SubDomain::from_str(value);
+
+            assert!(subdomain.is_ok());
+
+            if let Ok(subdomain) = subdomain {
+                assert_eq!(subdomain.to_string(), expected);
+            }
+        }
+    }
+}
