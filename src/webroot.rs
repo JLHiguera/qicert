@@ -1,8 +1,8 @@
-use std::path::PathBuf;
-use std::{fmt::Display, error::Error};
 use crate::domain::Domain;
 use std::fs;
+use std::path::PathBuf;
 use std::process::Command;
+use std::{error::Error, fmt::Display};
 
 #[derive(Debug)]
 pub enum WebRootError {
@@ -45,7 +45,7 @@ impl WebRoot {
     }
 
     fn create_dummy_html(domain: &Domain) -> Result<(), WebRootError> {
-        if ! Self::exists(domain) {
+        if !Self::exists(domain) {
             return Err(WebRootError::CreationFailure);
         }
 
@@ -53,8 +53,7 @@ impl WebRoot {
 
         root_path.push("index.html");
 
-        fs::write(root_path, "<p>hello</p>")
-            .map_err(|_| WebRootError::CreationFailure)?;
+        fs::write(root_path, "<p>hello</p>").map_err(|_| WebRootError::CreationFailure)?;
 
         Ok(())
     }
@@ -80,19 +79,21 @@ impl WebRoot {
     }
 
     fn has_files(domain: &Domain) -> bool {
-        if ! Self::exists(domain) {
+        if !Self::exists(domain) {
             return false;
         }
 
         let webroot_path = Self::build_pathbuf(domain);
 
-        webroot_path.read_dir()
+        webroot_path
+            .read_dir()
             .map(|e| e.count() > 0)
             .expect("FIXME: could not read webroot directory")
     }
 
     pub fn build_path_string(domain: &Domain) -> String {
-        Self::build_pathbuf(domain).to_owned()
+        Self::build_pathbuf(domain)
+            .to_owned()
             .to_string_lossy()
             .to_string()
     }
@@ -108,7 +109,7 @@ impl WebRoot {
     }
 
     fn chown_to_www(domain: &Domain) -> Result<(), WebRootError> {
-        if ! Self::exists(domain) {
+        if !Self::exists(domain) {
             return Err(WebRootError::DoesNotExist);
         }
 
@@ -124,7 +125,6 @@ impl WebRoot {
 
         Ok(())
     }
-
 }
 
 #[cfg(test)]

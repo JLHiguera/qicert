@@ -1,4 +1,4 @@
-use std::{error::Error, process::Command, path::PathBuf, fmt::Display};
+use std::{error::Error, fmt::Display, path::PathBuf, process::Command};
 
 #[derive(Debug)]
 pub enum NginxError {
@@ -9,11 +9,10 @@ pub enum NginxError {
 
 impl Error for NginxError {}
 
-
 impl Display for NginxError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            NginxError::CannotReload => write!(f,  "Could not reload Nginx."),
+            NginxError::CannotReload => write!(f, "Could not reload Nginx."),
             NginxError::BadConfiguration => write!(f, "Nginx -t failed. Bad Configuration."),
             NginxError::NotInstalled => write!(f, "Nginx was not found in /usr/sbin."),
         }
@@ -33,8 +32,8 @@ impl Nginx {
             .and_then(|c| c.wait_with_output())
             .map_err(|_| NginxError::CannotReload)?;
 
-        if ! output.status.success() {
-            return Err(NginxError::CannotReload)
+        if !output.status.success() {
+            return Err(NginxError::CannotReload);
         }
 
         Ok(())
@@ -42,20 +41,20 @@ impl Nginx {
 
     pub fn check() -> Result<(), NginxError> {
         let output = Command::new("nginx")
-        .arg("-t")
-        .spawn()
-        .and_then(|c| c.wait_with_output())
-        .map_err(|_| NginxError::BadConfiguration)?;
+            .arg("-t")
+            .spawn()
+            .and_then(|c| c.wait_with_output())
+            .map_err(|_| NginxError::BadConfiguration)?;
 
-        if ! output.status.success() {
-            return Err(NginxError::BadConfiguration)
+        if !output.status.success() {
+            return Err(NginxError::BadConfiguration);
         }
 
         Ok(())
     }
 
     pub fn check_and_reload() -> Result<(), NginxError> {
-        if ! Self::is_installed() {
+        if !Self::is_installed() {
             return Err(NginxError::NotInstalled);
         }
 

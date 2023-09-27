@@ -1,4 +1,10 @@
-use std::{fs, error::Error, io::{SeekFrom, Seek}, path::PathBuf, fmt::Display};
+use std::{
+    error::Error,
+    fmt::Display,
+    fs,
+    io::{Seek, SeekFrom},
+    path::PathBuf,
+};
 
 use crate::{domain::Domain, sites::Sites};
 
@@ -10,7 +16,6 @@ pub enum ConfigError {
     Appending,
     SymlinkExists,
     FileExists,
-
 }
 
 impl Display for ConfigError {
@@ -28,11 +33,11 @@ impl ConfigFile {
         fn inner(haystack: &str, domain: &Domain) -> bool {
             let needle = format!("server_name {};", domain);
 
-            haystack.lines()
+            haystack
+                .lines()
                 .map(|l| l.trim())
                 .filter(|l| !l.contains('#'))
                 .any(|l| l.contains(needle.as_str()))
-
         }
 
         inner(haystack.as_ref(), domain)
@@ -46,7 +51,7 @@ impl ConfigFile {
 
     fn file_path(domain: &Domain) -> PathBuf {
         let (mut sites_available, _) = Sites::paths();
-        
+
         let file_name = Self::file_name(domain);
 
         sites_available.push(file_name);
@@ -71,7 +76,7 @@ impl ConfigFile {
             .arg("www-data:www-data")
             .arg(conf_file_path)
             .spawn()
-            .and_then(|mut p| p.wait() )
+            .and_then(|mut p| p.wait())
             .map_err(|_| ConfigError::FileSaving)?;
 
         Ok(())
@@ -90,12 +95,11 @@ impl ConfigFile {
 
     //     match meta {
     //         Ok(meta) => meta.len() == 0,
-            
+
     //     }
 
     //     let metadata = fs::metadata(conf_path)
     //         .map_err(|_| ConfigError::InvalidPath)?;
-
 
     //     Ok(metadata.len() == 0)
     // }
@@ -107,8 +111,7 @@ impl ConfigFile {
 
         let conf_path = Self::file_path(domain);
 
-        let file = fs::File::create(conf_path)
-            .map_err(|_| ConfigError::FileSaving)?;
+        let file = fs::File::create(conf_path).map_err(|_| ConfigError::FileSaving)?;
 
         Ok(file)
     }
@@ -118,8 +121,7 @@ impl ConfigFile {
 
         let backup_path = Self::backup_path(domain);
 
-        std::fs::copy(file_path, backup_path)
-            .map_err(|_| ConfigError::FileSaving)?;
+        std::fs::copy(file_path, backup_path).map_err(|_| ConfigError::FileSaving)?;
 
         Ok(())
     }
@@ -142,7 +144,7 @@ impl ConfigFile {
         file.set_len(0)?;
 
         file.seek(SeekFrom::End(0))?;
-        
+
         Ok(())
     }
 
@@ -171,15 +173,14 @@ impl ConfigFile {
     pub fn open(domain: &Domain) -> Result<fs::File, ConfigError> {
         let conf_path = Self::file_path(domain);
 
-        let file = fs::File::open(conf_path)
-            .map_err(|_| ConfigError::InvalidPath)?;
+        let file = fs::File::open(conf_path).map_err(|_| ConfigError::InvalidPath)?;
 
         Ok(file)
     }
 
     fn copy_to_string(domain: &Domain) -> Result<String, ConfigError> {
-        let content = fs::read_to_string(Self::file_path(domain))
-            .map_err(|_| ConfigError::InvalidPath)?;
+        let content =
+            fs::read_to_string(Self::file_path(domain)).map_err(|_| ConfigError::InvalidPath)?;
 
         Ok(content)
     }
@@ -204,9 +205,12 @@ mod test {
         }";
 
         for (domain, expected) in domains {
-
             if let Ok(domain) = domain {
-                assert_eq!(ConfigFile::find_domain_in_str(haystack, &domain), expected, "domain: {domain}");
+                assert_eq!(
+                    ConfigFile::find_domain_in_str(haystack, &domain),
+                    expected,
+                    "domain: {domain}"
+                );
             }
         }
     }
@@ -226,11 +230,13 @@ mod test {
         }";
 
         for (domain, expected) in domains {
-
             if let Ok(domain) = domain {
-                assert_eq!(ConfigFile::find_domain_in_str(haystack, &domain), expected, "domain: {domain}");
+                assert_eq!(
+                    ConfigFile::find_domain_in_str(haystack, &domain),
+                    expected,
+                    "domain: {domain}"
+                );
             }
-
         }
     }
 
@@ -252,9 +258,12 @@ mod test {
         }";
 
         for (domain, expected) in domains {
-
             if let Ok(domain) = domain {
-                assert_eq!(ConfigFile::find_domain_in_str(haystack, &domain), expected, "domain: {domain}");
+                assert_eq!(
+                    ConfigFile::find_domain_in_str(haystack, &domain),
+                    expected,
+                    "domain: {domain}"
+                );
             }
         }
     }
@@ -294,7 +303,7 @@ mod test {
 
     #[test]
     fn backup_file_path_with_subdomain() {
-        let domain = Domain::new_unchecked( "example", "com", Some("www"));
+        let domain = Domain::new_unchecked("example", "com", Some("www"));
 
         let expected = PathBuf::from("/etc/nginx/sites-available/example.com.conf.bak");
 

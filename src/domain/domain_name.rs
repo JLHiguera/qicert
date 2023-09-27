@@ -14,7 +14,7 @@ impl DomainName {
         matches!(char, 'a'..='z' | '0'..='9' | '-')
     }
 
-   pub fn is_valid(name: &str) -> bool {
+    pub fn is_valid(name: &str) -> bool {
         if name.is_empty() {
             return false;
         }
@@ -35,11 +35,11 @@ impl Display for DomainName {
 
 impl FromStr for DomainName {
     type Err = DomainError;
-    
+
     fn from_str(value: &str) -> Result<Self, Self::Err> {
         let value = value.to_lowercase();
 
-        if ! Self::is_valid(value.as_str()) {
+        if !Self::is_valid(value.as_str()) {
             return Err(Self::Err::InvalidName);
         }
 

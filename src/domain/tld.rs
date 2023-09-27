@@ -1,4 +1,4 @@
-use std::{str::FromStr, fmt::Display};
+use std::{fmt::Display, str::FromStr};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Tld(String);
@@ -23,7 +23,6 @@ impl Tld {
             if value.starts_with('.') || value.ends_with('.') {
                 return false;
             }
-
 
             value.chars().all(Tld::is_valid_char)
         }
@@ -52,7 +51,7 @@ impl Display for TldError {
 
 impl FromStr for Tld {
     type Err = TldError;
-    
+
     fn from_str(value: &str) -> Result<Self, Self::Err> {
         let value = value.to_lowercase();
 
@@ -60,7 +59,7 @@ impl FromStr for Tld {
             return Err(Self::Err::TooShort);
         }
 
-        if ! Self::is_valid(value.as_str()) {
+        if !Self::is_valid(value.as_str()) {
             return Err(Self::Err::InvalidCharset);
         }
 
@@ -93,7 +92,11 @@ mod test {
         for (value, expected) in tlds {
             let tld = Tld::from_str(value);
 
-            assert_eq!(tld.is_ok(), expected, "value used: {value} with expected result: {expected}");
+            assert_eq!(
+                tld.is_ok(),
+                expected,
+                "value used: {value} with expected result: {expected}"
+            );
         }
     }
 
@@ -112,7 +115,7 @@ mod test {
 
             assert!(tld.is_ok());
 
-            if let Ok(tld) = tld  {
+            if let Ok(tld) = tld {
                 assert_eq!(tld.to_string(), expected);
             }
         }

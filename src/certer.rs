@@ -1,4 +1,9 @@
-use std::{process::{Command, Stdio}, error::Error, path::PathBuf, fmt::Display};
+use std::{
+    error::Error,
+    fmt::Display,
+    path::PathBuf,
+    process::{Command, Stdio},
+};
 
 use crate::{domain::Domain, webroot::WebRoot};
 
@@ -29,7 +34,7 @@ impl Certer {
     }
 
     pub fn run(domain: &Domain) -> Result<(), CertBotError> {
-        if ! Self::is_installed() {
+        if !Self::is_installed() {
             return Err(CertBotError::NotInstalled);
         }
 

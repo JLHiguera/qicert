@@ -39,7 +39,7 @@ impl FromStr for SubDomain {
     fn from_str(value: &str) -> Result<Self, Self::Err> {
         let value = value.to_lowercase();
 
-        if ! Self::is_valid(&value) {
+        if !Self::is_valid(&value) {
             return Err(Self::Err::InvalidSubdomain);
         }
 

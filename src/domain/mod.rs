@@ -2,9 +2,9 @@ mod domain_name;
 mod subdomain;
 mod tld;
 
-use std::{fmt::Display, error::Error, str::FromStr};
+use std::{error::Error, fmt::Display, str::FromStr};
 
-use crate::domain::{domain_name::DomainName, tld::Tld, subdomain::SubDomain};
+use crate::domain::{domain_name::DomainName, subdomain::SubDomain, tld::Tld};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Domain {
@@ -34,13 +34,16 @@ impl Display for DomainError {
 impl Error for DomainError {}
 
 impl Domain {
-    pub fn new<S: AsRef<str>>(name: S, tld: S, subdomain: Option<&str>) -> Result<Self, DomainError> {
+    pub fn new<S: AsRef<str>>(
+        name: S,
+        tld: S,
+        subdomain: Option<&str>,
+    ) -> Result<Self, DomainError> {
         fn inner(name: &str, tld: &str, subdomain: Option<&str>) -> Result<Domain, DomainError> {
             let name = DomainName::from_str(name)?;
 
-            let tld = Tld::from_str(tld)
-                .map_err(|_| DomainError::InvalidTld)?;
-            
+            let tld = Tld::from_str(tld).map_err(|_| DomainError::InvalidTld)?;
+
             let subdomain = match subdomain {
                 Some(sub) => Some(SubDomain::from_str(sub)?),
                 None => None,
@@ -50,13 +53,15 @@ impl Domain {
 
             Ok(domain)
         }
-        
+
         inner(name.as_ref(), tld.as_ref(), subdomain)
     }
 
     pub fn from_parts(name: DomainName, tld: Tld, subdomain: Option<SubDomain>) -> Self {
         Self {
-            name, tld, subdomain
+            name,
+            tld,
+            subdomain,
         }
     }
 
@@ -88,7 +93,7 @@ impl Domain {
     fn is_valid_char(char: char) -> bool {
         matches!(char, 'a'..='z' | '0'..='9'| '.')
     }
-    
+
     pub fn conf_file_name(&self) -> String {
         format!("{}.{}.conf", self.name, self.tld)
     }
@@ -147,7 +152,7 @@ mod test {
         let domain = Domain::new("example", "com", None);
 
         assert!(domain.is_ok());
-        
+
         if let Ok(domain) = domain {
             assert_eq!(domain, expected);
         }
@@ -180,7 +185,11 @@ mod test {
         for (domain_name, tld, expected) in domain_parts {
             let domain = Domain::new(domain_name, tld, None);
 
-            assert_eq!(domain.is_ok(), expected, "domain tested was: {domain_name}, and {tld}");
+            assert_eq!(
+                domain.is_ok(),
+                expected,
+                "domain tested was: {domain_name}, and {tld}"
+            );
         }
     }
 
@@ -198,7 +207,11 @@ mod test {
         for (domain_name, tld, subdomain, expected) in domain_parts {
             let domain = Domain::new(domain_name, tld, Some(subdomain));
 
-            assert_eq!(domain.is_ok(), expected, "name: {domain_name}, tld: {tld}, subdomain: {subdomain}");
+            assert_eq!(
+                domain.is_ok(),
+                expected,
+                "name: {domain_name}, tld: {tld}, subdomain: {subdomain}"
+            );
         }
     }
 
@@ -207,9 +220,24 @@ mod test {
         let domain_parts = vec![
             ("example", "com", "test1", "test1.example.com"),
             ("example", "com.mx", "staging01", "staging01.example.com.mx"),
-            ("example", "com.mx", "staging02.test", "staging02.test.example.com.mx"),
-            ("example", "net", "staging-02.test", "staging-02.test.example.net"),
-            ("example", "net", "staging-02.test", "staging-02.test.example.net"),
+            (
+                "example",
+                "com.mx",
+                "staging02.test",
+                "staging02.test.example.com.mx",
+            ),
+            (
+                "example",
+                "net",
+                "staging-02.test",
+                "staging-02.test.example.net",
+            ),
+            (
+                "example",
+                "net",
+                "staging-02.test",
+                "staging-02.test.example.net",
+            ),
         ];
 
         for (domain_name, tld, subdomain, expected) in domain_parts {
@@ -218,7 +246,11 @@ mod test {
             assert!(domain.is_ok());
 
             if let Ok(domain) = domain {
-                assert_eq!(domain.to_string(), expected, "domain given: {domain},expected: {expected}");
+                assert_eq!(
+                    domain.to_string(),
+                    expected,
+                    "domain given: {domain},expected: {expected}"
+                );
             }
         }
     }
@@ -240,7 +272,7 @@ mod test {
             assert_eq!(domain.to_string(), expected_string);
         }
     }
-    
+
     #[test]
     fn build_from_parts_with_subdomain() {
         let expected_domain = Domain::new_unchecked("example", "net", Some("www"));

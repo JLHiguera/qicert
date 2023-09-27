@@ -6,15 +6,17 @@ impl HttpConfig {
     pub fn http_redirect_content(domain: &Domain) -> String {
         let domain_name = domain.to_string();
 
-        format!("server {{
+        format!(
+            "server {{
             listen 80;
     
             server_name {domain_name};
     
             return 301 https://{domain_name}$request_uri;
-    }}")
+    }}"
+        )
     }
-    
+
     fn server_name(domain: &Domain) -> String {
         format!("server_name {}", domain)
     }
@@ -24,7 +26,8 @@ impl HttpConfig {
 
         let root = WebRoot::build_path_string(domain);
 
-        format!("server {{
+        format!(
+            "server {{
             listen 80;
     
             {server_name};
@@ -34,15 +37,17 @@ impl HttpConfig {
                 allow all;
                 default_type \"text/plain\";
             }}
-    }}")
+    }}"
+        )
     }
-    
+
     pub fn https_content(domain: &Domain) -> String {
         let server_name = Self::server_name(domain);
-        
+
         let root = format!("root {}", WebRoot::build_path_string(domain));
 
-        format!(r##"server {{
+        format!(
+            r##"server {{
             {server_name};
             listen 443 ssl;
         
@@ -58,7 +63,8 @@ impl HttpConfig {
             location / {{
                 try_files $uri $uri/ =404;
             }}
-    }}"##)
+    }}"##
+        )
     }
 }
 
@@ -68,7 +74,8 @@ mod test {
 
     #[test]
     fn acme_challenge_block_no_subdomain() {
-        let expected = format!("server {{
+        let expected = format!(
+            "server {{
             listen 80;
     
             server_name example.com;
@@ -78,20 +85,22 @@ mod test {
                 allow all;
                 default_type \"text/plain\";
             }}
-    }}");
+    }}"
+        );
 
-    let domain = Domain::new("example", "com", None);
+        let domain = Domain::new("example", "com", None);
 
-    if let Ok(domain) = domain {
-        let challenge_block = HttpConfig::http_well_known(&domain);
+        if let Ok(domain) = domain {
+            let challenge_block = HttpConfig::http_well_known(&domain);
 
-        assert_eq!(challenge_block, expected);
+            assert_eq!(challenge_block, expected);
         }
     }
 
     #[test]
     fn acme_challenge_block_with_subdomain() {
-        let expected = format!("server {{
+        let expected = format!(
+            "server {{
             listen 80;
     
             server_name test.example.com;
@@ -101,7 +110,8 @@ mod test {
                 allow all;
                 default_type \"text/plain\";
             }}
-    }}");
+    }}"
+        );
 
         let domain = Domain::new("example", "com", Some("test"));
 
@@ -114,7 +124,8 @@ mod test {
 
     #[test]
     fn https_block_no_subdomain() {
-        let expected = format!(r##"server {{
+        let expected = format!(
+            r##"server {{
             server_name example.com;
             listen 443 ssl;
         
@@ -130,7 +141,8 @@ mod test {
             location / {{
                 try_files $uri $uri/ =404;
             }}
-    }}"##);
+    }}"##
+        );
 
         let domain = Domain::new("example", "com", None);
 
@@ -138,13 +150,13 @@ mod test {
             let http_block = HttpConfig::https_content(&domain);
 
             assert_eq!(http_block, expected);
-            
         }
     }
 
     #[test]
     fn https_block_with_subdomain() {
-        let expected = format!(r##"server {{
+        let expected = format!(
+            r##"server {{
             server_name www.example.com;
             listen 443 ssl;
         
@@ -160,7 +172,8 @@ mod test {
             location / {{
                 try_files $uri $uri/ =404;
             }}
-    }}"##);
+    }}"##
+        );
 
         //let domain = Domain::try_from("www.example.com").unwrap();
         let domain = Domain::new("example", "com", Some("www"));
@@ -174,13 +187,15 @@ mod test {
 
     #[test]
     fn http_redirect_block_no_subdomain() {
-        let expected = format!("server {{
+        let expected = format!(
+            "server {{
             listen 80;
     
             server_name example.com;
     
             return 301 https://example.com$request_uri;
-    }}");
+    }}"
+        );
 
         let domain = Domain::new("example", "com", None);
 
@@ -191,16 +206,17 @@ mod test {
         }
     }
 
-
     #[test]
     fn http_redirect_block_with_subdomain() {
-        let expected = format!("server {{
+        let expected = format!(
+            "server {{
             listen 80;
     
             server_name www.example.com;
     
             return 301 https://www.example.com$request_uri;
-    }}");
+    }}"
+        );
 
         let domain = Domain::new("example", "com", Some("www"));
 

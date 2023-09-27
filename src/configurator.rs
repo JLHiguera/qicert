@@ -1,14 +1,25 @@
-use std::{error::Error, fs::File, io::{Write, Read}};
+use std::{
+    error::Error,
+    fs::File,
+    io::{Read, Write},
+};
 
-use crate::{config_file::{ConfigFile, ConfigError}, linker::Linker, domain::Domain, http_config::HttpConfig, webroot::{WebRoot, WebRootError}, certer::Certer};
 use crate::nginx::Nginx;
+use crate::{
+    certer::Certer,
+    config_file::{ConfigError, ConfigFile},
+    domain::Domain,
+    http_config::HttpConfig,
+    linker::Linker,
+    webroot::{WebRoot, WebRootError},
+};
 
 pub struct Configurator;
 
 impl Configurator {
     fn create_file_and_link(domain: &Domain) -> Result<File, Box<dyn Error>> {
         if ConfigFile::file_exists(domain) {
-            return Err(ConfigError::InvalidPath)?
+            return Err(ConfigError::InvalidPath)?;
         }
 
         let file = ConfigFile::create(domain)?;
@@ -30,8 +41,7 @@ impl Configurator {
     fn add_well_known(file: &mut File, domain: &Domain) -> Result<(), Box<dyn Error>> {
         let server_block = HttpConfig::http_well_known(domain);
 
-        writeln!(file, "{}", server_block)
-            .map_err(|_| ConfigError::FileSaving)?;
+        writeln!(file, "{}", server_block).map_err(|_| ConfigError::FileSaving)?;
 
         Ok(())
     }
@@ -89,7 +99,7 @@ impl Configurator {
     pub fn append_or_create(domain: &Domain) -> Result<(), Box<dyn Error>> {
         Self::panic_if_missing_nginx_or_certbot();
 
-        if ! ConfigFile::file_exists(domain) {
+        if !ConfigFile::file_exists(domain) {
             return Self::new(domain);
         }
 
@@ -103,13 +113,13 @@ impl Configurator {
 
         let content_backup = {
             let mut tmp = String::new();
-        
+
             file.read_to_string(&mut tmp)?;
 
             tmp
         };
-        
-        if ! ConfigFile::find_domain_in_str(content_backup.as_str(), domain) {
+
+        if !ConfigFile::find_domain_in_str(content_backup.as_str(), domain) {
             Self::add_well_known(&mut file, domain)?;
 
             match WebRoot::create_and_set_chown(domain) {

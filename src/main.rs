@@ -1,19 +1,19 @@
 #![cfg(unix)]
 
-mod sites;
-mod domain;
-mod webroot;
-mod http_config;
-mod linker;
 mod certer;
 mod config_file;
 mod configurator;
+mod domain;
+mod http_config;
+mod linker;
 mod nginx;
+mod sites;
+mod webroot;
 
 use std::error::Error;
 
-use crate::domain::Domain;
 use crate::configurator::Configurator;
+use crate::domain::Domain;
 
 use clap::Parser;
 
@@ -34,12 +34,12 @@ struct Cli {
     tld: String,
 }
 
-fn main() -> Result<(), Box<dyn Error>>{
+fn main() -> Result<(), Box<dyn Error>> {
     let cli = Cli::parse();
 
     let name = cli.domain;
     let tld = cli.tld;
-    let subdomain = cli.subdomain; 
+    let subdomain = cli.subdomain;
 
     let domain = Domain::new(name, tld, subdomain.as_deref())?;
 

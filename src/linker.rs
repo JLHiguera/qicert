@@ -1,6 +1,10 @@
 use std::os::unix::fs as unix_fs;
 
-use crate::{domain::Domain, sites::Sites, config_file::{ConfigError, ConfigFile}};
+use crate::{
+    config_file::{ConfigError, ConfigFile},
+    domain::Domain,
+    sites::Sites,
+};
 
 pub struct Linker;
 
@@ -27,8 +31,7 @@ impl Linker {
         sites_available.push(file_name.as_str());
         sites_enabled.push(file_name.as_str());
 
-        unix_fs::symlink(sites_available, sites_enabled)
-            .map_err(|_| ConfigError::Linking)?;
+        unix_fs::symlink(sites_available, sites_enabled).map_err(|_| ConfigError::Linking)?;
 
         Ok(())
     }
