@@ -69,7 +69,7 @@ impl Domain {
 
     #[cfg(test)]
     pub fn new_unchecked<S: AsRef<str>>(name: S, tld: S, subdomain: Option<&str>) -> Self {
-        Self::new(name.as_ref(), tld.as_ref(), subdomain.as_deref()).unwrap()
+        Self::new(name.as_ref(), tld.as_ref(), subdomain).unwrap()
     }
 
     pub fn get_name(&self) -> DomainName {
@@ -77,7 +77,7 @@ impl Domain {
     }
 
     pub fn get_tld(&self) -> Tld {
-        self.tld.to_owned()
+        self.tld.clone()
     }
 
     pub fn conf_file_name(&self) -> String {

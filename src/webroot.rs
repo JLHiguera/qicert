@@ -92,8 +92,7 @@ impl WebRoot {
     }
 
     pub fn build_path_string(domain: &Domain) -> String {
-        Self::build_pathbuf(domain)
-            .to_owned()
+        Self::build_pathbuf(domain).clone()
             .to_string_lossy()
             .to_string()
     }

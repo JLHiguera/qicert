@@ -2,7 +2,7 @@ use std::{
     error::Error,
     fmt::Display,
     path::PathBuf,
-    process::{Command, Stdio},
+    process::{Command, Stdio, Child},
 };
 
 use crate::{domain::Domain, webroot::WebRoot};
@@ -49,7 +49,7 @@ impl Certer {
             .arg(domain.to_string().as_str())
             .stdout(Stdio::piped())
             .spawn()
-            .and_then(|c| c.wait_with_output())
+            .and_then(Child::wait_with_output)
             .map_err(|_| CertBotError::ProcessFailure)?;
 
         Ok(())

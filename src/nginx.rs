@@ -1,4 +1,4 @@
-use std::{error::Error, fmt::Display, path::PathBuf, process::Command};
+use std::{error::Error, fmt::Display, path::PathBuf, process::{Command, Child}};
 
 #[derive(Debug)]
 pub enum NginxError {
@@ -29,7 +29,7 @@ impl Nginx {
             .arg("reload")
             .arg("nginx")
             .spawn()
-            .and_then(|c| c.wait_with_output())
+            .and_then(Child::wait_with_output)
             .map_err(|_| NginxError::CannotReload)?;
 
         if !output.status.success() {
@@ -43,7 +43,7 @@ impl Nginx {
         let output = Command::new("nginx")
             .arg("-t")
             .spawn()
-            .and_then(|c| c.wait_with_output())
+            .and_then(Child::wait_with_output)
             .map_err(|_| NginxError::BadConfiguration)?;
 
         if !output.status.success() {

@@ -36,11 +36,11 @@ pub struct ConfigFile;
 impl ConfigFile {
     pub fn find_domain_in_str<S: AsRef<str>>(haystack: S, domain: &Domain) -> bool {
         fn inner(haystack: &str, domain: &Domain) -> bool {
-            let needle = format!("server_name {};", domain);
+            let needle = format!("server_name {domain};");
 
             haystack
                 .lines()
-                .map(|l| l.trim())
+                .map(str::trim)
                 .filter(|l| !l.contains('#'))
                 .any(|l| l.contains(needle.as_str()))
         }

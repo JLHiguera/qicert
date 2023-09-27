@@ -41,7 +41,7 @@ impl Configurator {
     fn add_well_known(file: &mut File, domain: &Domain) -> Result<(), Box<dyn Error>> {
         let server_block = HttpConfig::http_well_known(domain);
 
-        writeln!(file, "{}", server_block).map_err(|_| ConfigError::FileSaving)?;
+        writeln!(file, "{server_block}").map_err(|_| ConfigError::FileSaving)?;
 
         Ok(())
     }
@@ -49,7 +49,7 @@ impl Configurator {
     fn add_redirect(file: &mut File, domain: &Domain) -> Result<(), Box<dyn Error>> {
         let redirect_block = HttpConfig::http_redirect_content(domain);
 
-        writeln!(file, "{}", redirect_block)?;
+        writeln!(file, "{redirect_block}")?;
 
         Ok(())
     }
@@ -57,7 +57,7 @@ impl Configurator {
     fn add_https(file: &mut File, domain: &Domain) -> Result<(), Box<dyn Error>> {
         let https_block = HttpConfig::https_content(domain);
 
-        writeln!(file, "{}", https_block)?;
+        writeln!(file, "{https_block}")?;
 
         Ok(())
     }
@@ -70,7 +70,7 @@ impl Configurator {
         Ok(())
     }
 
-    fn new(domain: &Domain) -> Result<(), Box<dyn Error>> {
+    fn create(domain: &Domain) -> Result<(), Box<dyn Error>> {
         let mut file = Self::create_file_and_link(domain)?;
 
         Self::add_well_known(&mut file, domain)?;
@@ -89,7 +89,7 @@ impl Configurator {
     fn panic_if_missing_nginx_or_certbot() {
         if !Self::are_nginx_and_certbot_installed() {
             std::panic::set_hook(Box::new(|_| {
-                println!("Nginx or Certbot are missing. Shutting down.")
+                println!("Nginx or Certbot are missing. Shutting down.");
             }));
 
             panic!()
@@ -100,7 +100,7 @@ impl Configurator {
         Self::panic_if_missing_nginx_or_certbot();
 
         if !ConfigFile::file_exists(domain) {
-            return Self::new(domain);
+            return Self::create(domain);
         }
 
         Self::append(domain)

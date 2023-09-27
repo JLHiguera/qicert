@@ -18,7 +18,7 @@ impl HttpConfig {
     }
 
     fn server_name(domain: &Domain) -> String {
-        format!("server_name {}", domain)
+        format!("server_name {domain}")
     }
 
     pub fn http_well_known(domain: &Domain) -> String {
@@ -74,19 +74,17 @@ mod test {
 
     #[test]
     fn acme_challenge_block_no_subdomain() {
-        let expected = format!(
-            "server {{
+        let expected = "server {
             listen 80;
     
             server_name example.com;
     
-            location ^~ /.well-known/acme-challenge/ {{
+            location ^~ /.well-known/acme-challenge/ {
                 root /var/www/example.com/public;
                 allow all;
                 default_type \"text/plain\";
-            }}
-    }}"
-        );
+            }
+    }".to_string();
 
         let domain = Domain::new("example", "com", None);
 
@@ -99,19 +97,17 @@ mod test {
 
     #[test]
     fn acme_challenge_block_with_subdomain() {
-        let expected = format!(
-            "server {{
+        let expected = "server {
             listen 80;
     
             server_name test.example.com;
     
-            location ^~ /.well-known/acme-challenge/ {{
+            location ^~ /.well-known/acme-challenge/ {
                 root /var/www/test.example.com/public;
                 allow all;
                 default_type \"text/plain\";
-            }}
-    }}"
-        );
+            }
+    }".to_string();
 
         let domain = Domain::new("example", "com", Some("test"));
 
@@ -124,8 +120,7 @@ mod test {
 
     #[test]
     fn https_block_no_subdomain() {
-        let expected = format!(
-            r##"server {{
+        let expected = r##"server {
             server_name example.com;
             listen 443 ssl;
         
@@ -138,11 +133,10 @@ mod test {
 
             root /var/www/example.com/public;
             index index.html;
-            location / {{
+            location / {
                 try_files $uri $uri/ =404;
-            }}
-    }}"##
-        );
+            }
+    }"##.to_string();
 
         let domain = Domain::new("example", "com", None);
 
@@ -155,8 +149,7 @@ mod test {
 
     #[test]
     fn https_block_with_subdomain() {
-        let expected = format!(
-            r##"server {{
+        let expected = r##"server {
             server_name www.example.com;
             listen 443 ssl;
         
@@ -169,11 +162,10 @@ mod test {
 
             root /var/www/www.example.com/public;
             index index.html;
-            location / {{
+            location / {
                 try_files $uri $uri/ =404;
-            }}
-    }}"##
-        );
+            }
+    }"##.to_string();
 
         //let domain = Domain::try_from("www.example.com").unwrap();
         let domain = Domain::new("example", "com", Some("www"));
@@ -187,15 +179,13 @@ mod test {
 
     #[test]
     fn http_redirect_block_no_subdomain() {
-        let expected = format!(
-            "server {{
+        let expected = "server {
             listen 80;
     
             server_name example.com;
     
             return 301 https://example.com$request_uri;
-    }}"
-        );
+    }".to_string();
 
         let domain = Domain::new("example", "com", None);
 
@@ -208,15 +198,13 @@ mod test {
 
     #[test]
     fn http_redirect_block_with_subdomain() {
-        let expected = format!(
-            "server {{
+        let expected = "server {
             listen 80;
     
             server_name www.example.com;
     
             return 301 https://www.example.com$request_uri;
-    }}"
-        );
+    }".to_string();
 
         let domain = Domain::new("example", "com", Some("www"));
 
