@@ -18,12 +18,14 @@ pub enum DomainError {
     InvalidName,
     InvalidSubdomain,
     InvalidTld,
+    TldTooShort,
 }
 
 impl Display for DomainError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::MissingTld => write!(f, "The Domain has no TLD"),
+            Self::TldTooShort => write!(f, "TLD given is too short"),
             Self::InvalidName => write!(f, "Invalid domain name"),
             Self::InvalidSubdomain => write!(f, "The subdomain given is invalid"),
             Self::InvalidTld => write!(f, "The TLD is invalid"),
@@ -42,7 +44,7 @@ impl Domain {
         fn inner(name: &str, tld: &str, subdomain: Option<&str>) -> Result<Domain, DomainError> {
             let name = DomainName::from_str(name)?;
 
-            let tld = Tld::from_str(tld).map_err(|_| DomainError::InvalidTld)?;
+            let tld = Tld::from_str(tld)?;
 
             let subdomain = match subdomain {
                 Some(sub) => Some(SubDomain::from_str(sub)?),
@@ -78,22 +80,6 @@ impl Domain {
         self.tld.to_owned()
     }
 
-    fn name_with_tld(&self) -> String {
-        format!("{}.{}", self.name, self.tld)
-    }
-
-    fn has_subdomain(&self) -> bool {
-        self.subdomain.is_some()
-    }
-
-    fn get_subdomain(&self) -> Option<SubDomain> {
-        self.subdomain.to_owned()
-    }
-
-    fn is_valid_char(char: char) -> bool {
-        matches!(char, 'a'..='z' | '0'..='9'| '.')
-    }
-
     pub fn conf_file_name(&self) -> String {
         format!("{}.{}.conf", self.name, self.tld)
     }
@@ -102,12 +88,12 @@ impl Domain {
 impl std::ops::Add<Tld> for DomainName {
     type Output = Domain;
 
-    fn add(self, rhs: Tld) -> Self::Output {
+    fn add(self, tld: Tld) -> Self::Output {
         let name = self;
 
         Self::Output {
-            name: name,
-            tld: rhs,
+            name,
+            tld,
             subdomain: None,
         }
     }

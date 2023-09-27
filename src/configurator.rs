@@ -11,7 +11,7 @@ use crate::{
     domain::Domain,
     http_config::HttpConfig,
     linker::Linker,
-    webroot::{WebRoot, WebRootError},
+    webroot::WebRoot,
 };
 
 pub struct Configurator;

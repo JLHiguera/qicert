@@ -13,14 +13,19 @@ pub enum ConfigError {
     Linking,
     FileSaving,
     InvalidPath,
-    Appending,
     SymlinkExists,
     FileExists,
 }
 
 impl Display for ConfigError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self)
+        match self {
+            Self::Linking => write!(f,"Configuration file could not be soft linked"),
+            Self::FileSaving => write!(f,"Configuration file could not be written to disk"),
+            Self::InvalidPath => write!(f,"An invalid path was given for a configuration file"),
+            Self::SymlinkExists => write!(f,"Symlink already exists"),
+            Self::FileExists => write!(f,"Configuration file already exists"),
+        }    
     }
 }
 
@@ -43,11 +48,6 @@ impl ConfigFile {
         inner(haystack.as_ref(), domain)
     }
 
-    pub fn find_domain_in_file(domain: &Domain) -> bool {
-        let haystack = Self::copy_to_string(domain).unwrap();
-
-        Self::find_domain_in_str(haystack, domain)
-    }
 
     fn file_path(domain: &Domain) -> PathBuf {
         let (mut sites_available, _) = Sites::paths();
@@ -88,22 +88,6 @@ impl ConfigFile {
         conf_path.exists() || conf_path.is_file()
     }
 
-    // fn is_empty(domain: &Domain) -> bool {
-    //     let conf_path = Self::file_path(domain);
-
-    //     let meta = fs::metadata(conf_path);
-
-    //     match meta {
-    //         Ok(meta) => meta.len() == 0,
-
-    //     }
-
-    //     let metadata = fs::metadata(conf_path)
-    //         .map_err(|_| ConfigError::InvalidPath)?;
-
-    //     Ok(metadata.len() == 0)
-    // }
-
     pub fn create(domain: &Domain) -> Result<fs::File, ConfigError> {
         if Self::file_exists(domain) {
             return Err(ConfigError::FileExists);
@@ -132,13 +116,6 @@ impl ConfigFile {
         file_path.with_extension("conf.bak")
     }
 
-    fn open_or_create(domain: &Domain) -> Result<fs::File, ConfigError> {
-        if !Self::file_exists(domain) {
-            return Self::create(domain);
-        }
-
-        Self::open(domain)
-    }
 
     pub fn truncate_file(file: &mut fs::File) -> Result<(), Box<dyn Error>> {
         file.set_len(0)?;
@@ -146,16 +123,6 @@ impl ConfigFile {
         file.seek(SeekFrom::End(0))?;
 
         Ok(())
-    }
-
-    pub fn append_or_create(domain: &Domain) -> Result<fs::File, ConfigError> {
-        if !Self::file_exists(domain) {
-            return Self::create(domain);
-        }
-
-        let file = Self::append(domain)?;
-
-        Ok(file)
     }
 
     pub fn append(domain: &Domain) -> Result<fs::File, ConfigError> {
@@ -168,21 +135,6 @@ impl ConfigFile {
             .map_err(|_| ConfigError::InvalidPath)?;
 
         Ok(file)
-    }
-
-    pub fn open(domain: &Domain) -> Result<fs::File, ConfigError> {
-        let conf_path = Self::file_path(domain);
-
-        let file = fs::File::open(conf_path).map_err(|_| ConfigError::InvalidPath)?;
-
-        Ok(file)
-    }
-
-    fn copy_to_string(domain: &Domain) -> Result<String, ConfigError> {
-        let content =
-            fs::read_to_string(Self::file_path(domain)).map_err(|_| ConfigError::InvalidPath)?;
-
-        Ok(content)
     }
 }
 

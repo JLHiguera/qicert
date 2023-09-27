@@ -1,5 +1,7 @@
 use std::{fmt::Display, str::FromStr};
 
+use super::DomainError;
+
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Tld(String);
 
@@ -10,10 +12,6 @@ impl Display for Tld {
 }
 
 impl Tld {
-    pub fn get(&self) -> String {
-        self.0.to_owned()
-    }
-
     pub fn is_valid<S: AsRef<str>>(value: S) -> bool {
         fn inner(value: &str) -> bool {
             if value.is_empty() {
@@ -34,33 +32,23 @@ impl Tld {
         matches!(char,  'a'..='z' | '0'..='9'| '.')
     }
 }
-#[derive(Debug)]
-pub enum TldError {
-    InvalidCharset,
-    TooShort,
-}
-
-impl Display for TldError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::InvalidCharset => write!(f, "The TLD has an invalid character"),
-            Self::TooShort => write!(f, "The TLD is too short"),
-        }
-    }
-}
 
 impl FromStr for Tld {
-    type Err = TldError;
+    type Err = DomainError;
 
     fn from_str(value: &str) -> Result<Self, Self::Err> {
         let value = value.to_lowercase();
 
+        if value.is_empty() {
+            return Err(Self::Err::MissingTld)
+        }
+
         if value.len() < 2 {
-            return Err(Self::Err::TooShort);
+            return Err(Self::Err::TldTooShort);
         }
 
         if !Self::is_valid(value.as_str()) {
-            return Err(Self::Err::InvalidCharset);
+            return Err(Self::Err::InvalidTld);
         }
 
         Ok(Self(value))

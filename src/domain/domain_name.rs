@@ -6,10 +6,6 @@ use super::DomainError;
 pub struct DomainName(String);
 
 impl DomainName {
-    pub fn get_name(&self) -> String {
-        self.0.clone()
-    }
-
     fn is_valid_char(char: char) -> bool {
         matches!(char, 'a'..='z' | '0'..='9' | '-')
     }
