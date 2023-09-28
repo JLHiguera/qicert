@@ -6,7 +6,9 @@ use std::{
     path::PathBuf,
 };
 
-use crate::{domain::Domain, sites::Sites};
+use crate::domain::Domain;
+use super::sites::Sites;
+
 
 #[derive(Debug)]
 pub enum ConfigError {

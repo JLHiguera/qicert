@@ -1,9 +1,8 @@
 use std::os::unix::fs as unix_fs;
 
 use crate::{
-    config_file::{ConfigError, ConfigFile},
+    nginx::{config_file::{ConfigError, ConfigFile}, sites::Sites},
     domain::Domain,
-    sites::Sites,
 };
 
 pub struct Linker;
