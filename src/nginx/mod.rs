@@ -1,6 +1,8 @@
 pub mod config_file;
 pub mod http_config;
 pub(crate) mod sites;
+pub(crate) mod configurator;
+pub(crate) mod linker;
 
 use std::{error::Error, fmt::Display, path::PathBuf, process::{Command, Child}};
 

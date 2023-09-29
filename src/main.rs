@@ -1,15 +1,13 @@
 #![cfg(unix)]
 
 mod certer;
-mod configurator;
 mod domain;
-mod linker;
 mod nginx;
 mod webroot;
 
 use std::error::Error;
 
-use crate::configurator::Configurator;
+use crate::nginx::configurator::Configurator;
 use crate::domain::Domain;
 
 use clap::Parser;

@@ -7,11 +7,11 @@ use std::{
 use crate::nginx::Nginx;
 use crate::nginx::config_file::{ConfigError, ConfigFile};
 use crate::nginx::http_config::HttpConfig;
+use crate::nginx::linker::Linker;
 
 use crate::{
     certer::Certer,
     domain::Domain,
-    linker::Linker,
     webroot::WebRoot,
 };
 
