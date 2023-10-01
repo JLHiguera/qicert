@@ -4,6 +4,7 @@ mod certer;
 mod domain;
 mod nginx;
 mod webroot;
+mod apache;
 
 use std::error::Error;
 

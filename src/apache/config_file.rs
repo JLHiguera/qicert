@@ -1,0 +1,133 @@
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn find_domain_without_subdomain_file() {
+        let domains = vec![
+            (Domain::new("example", "com", None), true),
+            (Domain::new("example", "com", Some("www")), false),
+            (Domain::new("Example", "com", None), true),
+            (Domain::new("example", "COM", None), true),
+            (Domain::new("www", "example", None), false),
+        ];
+
+        let haystack = r#"
+        <VirtualHost *:443>
+            ServerName www.example.com
+            SSLEngine on
+            SSLCertificateFile "/path/to/www.example.com.cert"
+            SSLCertificateKeyFile "/path/to/www.example.com.key"
+        </VirtualHost>"#;
+
+        for (domain, expected) in domains {
+            if let Ok(domain) = domain {
+                assert_eq!(
+                    apache::ConfigFile::find_domain_in_str(haystack, &domain),
+                    expected,
+                    "domain: {domain}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn find_domain_with_subdomain_in_file() {
+        let domains = vec![
+            (Domain::new("example", "com", None), false),
+            (Domain::new("example", "com", Some("www")), true),
+            (Domain::new("Example", "com", None), false),
+            (Domain::new("example", "COM", None), false),
+            (Domain::new("www", "example", None), false),
+        ];
+        let haystack = r#"
+        <VirtualHost *:443>
+            ServerName www.example.com
+            SSLEngine on
+            SSLCertificateFile "/path/to/www.example.com.cert"
+            SSLCertificateKeyFile "/path/to/www.example.com.key"
+        </VirtualHost>"#;
+
+        for (domain, expected) in domains {
+            if let Ok(domain) = domain {
+                assert_eq!(
+                    apache::ConfigFile::find_domain_in_str(haystack, &domain),
+                    expected,
+                    "domain: {domain}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn find_domain_with_commencted_lines() {
+        let domains = vec![
+            (Domain::new("example", "com", None), false),
+            (Domain::new("example", "com", Some("www")), true),
+            (Domain::new("Example", "com", None), false),
+            (Domain::new("example", "COM", None), false),
+            (Domain::new("www", "example", None), false),
+        ];
+
+        let haystack = "server {
+            #ServerName example.com
+            ServerName www.example.com
+            #ServerName www.example
+            #ServerName example.COM
+        }";
+
+        for (domain, expected) in domains {
+            if let Ok(domain) = domain {
+                assert_eq!(
+                    ConfigFile::find_domain_in_str(haystack, &domain),
+                    expected,
+                    "domain: {domain}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn config_file_path_without_subdomain() {
+        let domain = Domain::new_unchecked("example", "com", None);
+
+        let expected = PathBuf::from("/etc/apache/sites-available/example.com.conf");
+
+        let file_path = ConfigFile::file_path(&domain);
+
+        assert_eq!(file_path, expected);
+    }
+
+    #[test]
+    fn config_file_path_with_subdomain() {
+        let domain = Domain::new_unchecked("example", "com", Some("www"));
+
+        let expected = PathBuf::from("/etc/apache/sites-available/example.com.conf");
+
+        let file_path = ConfigFile::file_path(&domain);
+
+        assert_eq!(file_path, expected);
+    }
+
+    #[test]
+    fn backup_file_path() {
+        let domain = Domain::new_unchecked("example", "com", None);
+
+        let expected = PathBuf::from("/etc/apache/sites-available/example.com.conf.bak");
+
+        let backup_path = ConfigFile::backup_path(&domain);
+
+        assert_eq!(backup_path, expected);
+    }
+
+    #[test]
+    fn backup_file_path_with_subdomain() {
+        let domain = Domain::new_unchecked("example", "com", Some("www"));
+
+        let expected = PathBuf::from("/etc/apache/sites-available/example.com.conf.bak");
+
+        let backup_path = ConfigFile::backup_path(&domain);
+
+        assert_eq!(backup_path, expected);
+    }
+}
