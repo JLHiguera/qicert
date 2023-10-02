@@ -1,55 +1,17 @@
 use std::path::PathBuf;
 
-use crate::domain::Domain;
+use crate::{domain::Domain, configuration_file::ConfigurationFile};
 
 pub struct ConfigFile;
 
-
-impl ConfigFile {
-    const SITES_AVAILABLE: &str = "/etc/apache/sites-available";
-
-    pub fn find_domain_in_str<S: AsRef<str>>(haystack: S, domain: &Domain) -> bool {
-        fn inner(haystack: &str, domain: &Domain) -> bool {
-            let needle = ConfigFile::server_name(domain);
-
-
-            haystack
-                .lines()
-                .map(str::trim)
-                .filter(|l| !l.contains('#'))
-                .any(|l| l.ends_with(&needle))
-        }
-        
-
-        inner(haystack.as_ref(), domain)
-    }
+impl<'a> ConfigurationFile<'a> for ConfigFile {
+    const SITES_AVAILABLE: &'a str = "/etc/apache/sites-available";
 
     fn server_name(domain: &Domain) -> String {
         format!("ServerName {domain}")
     }
-
-    pub fn file_name(domain: &Domain) -> String {
-        format!("{}.{}.conf", domain.get_name(), domain.get_tld())
-    }
-
-    fn file_path(domain: &Domain) -> PathBuf {
-        let mut base_path = Self::sites_enabled_path();
-
-        let file_name = Self::file_name(domain);
-
-        base_path.push(file_name);
-
-        base_path
-    }
-
-    fn backup_path(domain: &Domain) -> PathBuf {
-        Self::file_path(domain).with_extension("conf.bak")
-    }
-
-    pub fn sites_enabled_path() -> PathBuf {
-        PathBuf::from(Self::SITES_AVAILABLE)
-    }
 }
+
 
 #[cfg(test)]
 mod test {
@@ -58,6 +20,8 @@ mod test {
     use crate::domain::Domain;
 
     use crate::apache::config_file::ConfigFile;
+
+    use crate::configuration_file::ConfigurationFile;
 
     #[test]
     fn find_domain_without_subdomain_file() {

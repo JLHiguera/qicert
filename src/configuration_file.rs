@@ -2,8 +2,8 @@ use std::path::PathBuf;
 
 use crate::domain::Domain;
 
-pub(crate) trait ConfigurationFile {
-    const SITES_AVAILABLE: &'static str;
+pub(crate) trait ConfigurationFile<'a> {
+    const SITES_AVAILABLE: &'a str;
 
     fn find_domain_in_str<S: AsRef<str>>(haystack: S, domain: &Domain) -> bool {
         let needle = Self::server_name(domain);
