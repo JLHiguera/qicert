@@ -10,7 +10,7 @@ impl ConfigFile {
 
     pub fn find_domain_in_str<S: AsRef<str>>(haystack: S, domain: &Domain) -> bool {
         fn inner(haystack: &str, domain: &Domain) -> bool {
-            let needle = format!("ServerName {domain}");
+            let needle = ConfigFile::server_name(domain);
 
 
             haystack
@@ -24,12 +24,16 @@ impl ConfigFile {
         inner(haystack.as_ref(), domain)
     }
 
+    fn server_name(domain: &Domain) -> String {
+        format!("ServerName {domain}")
+    }
+
     pub fn file_name(domain: &Domain) -> String {
         format!("{}.{}.conf", domain.get_name(), domain.get_tld())
     }
 
     fn file_path(domain: &Domain) -> PathBuf {
-        let mut base_path = Self::path();
+        let mut base_path = Self::sites_enabled_path();
 
         let file_name = Self::file_name(domain);
 
@@ -42,7 +46,7 @@ impl ConfigFile {
         Self::file_path(domain).with_extension("conf.bak")
     }
 
-    pub fn path() -> PathBuf {
+    pub fn sites_enabled_path() -> PathBuf {
         PathBuf::from(Self::SITES_AVAILABLE)
     }
 }
