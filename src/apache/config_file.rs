@@ -1,6 +1,59 @@
+use std::path::PathBuf;
+
+use crate::domain::Domain;
+
+pub struct ConfigFile;
+
+
+impl ConfigFile {
+    const SITES_AVAILABLE: &str = "/etc/apache/sites-available";
+
+    pub fn find_domain_in_str<S: AsRef<str>>(haystack: S, domain: &Domain) -> bool {
+        fn inner(haystack: &str, domain: &Domain) -> bool {
+            let needle = format!("ServerName {domain}");
+
+
+            haystack
+                .lines()
+                .map(str::trim)
+                .filter(|l| !l.contains('#'))
+                .any(|l| l.ends_with(&needle))
+        }
+        
+
+        inner(haystack.as_ref(), domain)
+    }
+
+    pub fn file_name(domain: &Domain) -> String {
+        format!("{}.{}.conf", domain.get_name(), domain.get_tld())
+    }
+
+    fn file_path(domain: &Domain) -> PathBuf {
+        let mut base_path = Self::path();
+
+        let file_name = Self::file_name(domain);
+
+        base_path.push(file_name);
+
+        base_path
+    }
+
+    fn backup_path(domain: &Domain) -> PathBuf {
+        Self::file_path(domain).with_extension("conf.bak")
+    }
+
+    pub fn path() -> PathBuf {
+        PathBuf::from(Self::SITES_AVAILABLE)
+    }
+}
+
 #[cfg(test)]
 mod test {
-    use super::*;
+    use std::path::PathBuf;
+
+    use crate::domain::Domain;
+
+    use crate::apache::config_file::ConfigFile;
 
     #[test]
     fn find_domain_without_subdomain_file() {
@@ -14,16 +67,16 @@ mod test {
 
         let haystack = r#"
         <VirtualHost *:443>
-            ServerName www.example.com
+            ServerName example.com
             SSLEngine on
-            SSLCertificateFile "/path/to/www.example.com.cert"
-            SSLCertificateKeyFile "/path/to/www.example.com.key"
+            SSLCertificateFile "/path/to/example.com.cert"
+            SSLCertificateKeyFile "/path/to/example.com.key"
         </VirtualHost>"#;
 
         for (domain, expected) in domains {
             if let Ok(domain) = domain {
                 assert_eq!(
-                    apache::ConfigFile::find_domain_in_str(haystack, &domain),
+                    ConfigFile::find_domain_in_str(haystack, &domain),
                     expected,
                     "domain: {domain}"
                 );
@@ -51,7 +104,7 @@ mod test {
         for (domain, expected) in domains {
             if let Ok(domain) = domain {
                 assert_eq!(
-                    apache::ConfigFile::find_domain_in_str(haystack, &domain),
+                    ConfigFile::find_domain_in_str(haystack, &domain),
                     expected,
                     "domain: {domain}"
                 );
@@ -60,7 +113,7 @@ mod test {
     }
 
     #[test]
-    fn find_domain_with_commencted_lines() {
+    fn find_domain_with_commented_lines() {
         let domains = vec![
             (Domain::new("example", "com", None), false),
             (Domain::new("example", "com", Some("www")), true),
@@ -69,12 +122,11 @@ mod test {
             (Domain::new("www", "example", None), false),
         ];
 
-        let haystack = "server {
+        let haystack = "
             #ServerName example.com
             ServerName www.example.com
             #ServerName www.example
-            #ServerName example.COM
-        }";
+            #ServerName example.COM";
 
         for (domain, expected) in domains {
             if let Ok(domain) = domain {

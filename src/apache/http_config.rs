@@ -160,8 +160,6 @@ mod test {
         assert_eq!(http_config, expected, "LEFT {http_config} \n\n RIGHT: {expected}");
     }
 
-
-
     #[test]
     fn https_block() {
         let expected = "
