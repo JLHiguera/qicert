@@ -1,6 +1,48 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, error::Error, fmt::Display, fs::File};
 
 use crate::{domain::Domain, configuration_file::ConfigurationFile};
+
+#[derive(Debug)]
+pub enum ConfigError {
+    FileSaving,
+    InvalidPath,
+    FileExists,
+}
+
+impl Display for ConfigError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::FileSaving => write!(f,"Apache Configuration file could not be written to disk"),
+            Self::InvalidPath => write!(f,"An invalid path was given for an Apache configuration file"),
+            Self::FileExists => write!(f,"Apache configuration file already exists"),
+        }    
+    }
+}
+
+impl Error for ConfigError {}
+
+
+impl ConfigFile {
+    pub fn chown_to_www(domain: &Domain) -> Result<(), ConfigError> {
+        Self::_chown_to_www(domain, ConfigError::FileSaving)
+    }
+
+    pub fn create(domain: &Domain) -> Result<File, ConfigError> {
+        Self::_create(
+            domain,
+            ConfigError::FileExists,
+            ConfigError::FileSaving,
+        )
+    }
+
+    pub fn create_backup(domain: &Domain) -> Result<(), ConfigError> {
+        Self::_create_backup(domain, ConfigError::FileSaving)
+    }
+
+    pub fn append(domain: &Domain) -> Result<File, ConfigError> {
+        Self::_append(domain, ConfigError::InvalidPath)
+    }
+}
 
 pub struct ConfigFile;
 
