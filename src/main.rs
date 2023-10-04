@@ -6,6 +6,7 @@ mod nginx;
 mod webroot;
 mod apache;
 mod configuration_file;
+mod webserver;
 use std::error::Error;
 
 use crate::nginx::configurator::Configurator;
