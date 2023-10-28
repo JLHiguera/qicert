@@ -1,8 +1,8 @@
-As of version 0.2.3, this tool only works under Linux and depends on Nginx and Certbot.
+As of version 0.3.0, this tool only works under Linux and depends on Nginx or Apache and Certbot.
 
 WARNING:
 READ THE CODE BEFORE RUNNING OR BUILDING
-BACKUP NGINX CONFIGURATION FILES IF NEEDED
+BACKUP NGINX OR APACHE CONFIGURATION FILES IF NEEDED
 DO NOT USE IN PRODUCTION!
 DO NOT USE IN CRITICAL SYSTEMS!
 
@@ -10,12 +10,12 @@ The use case for this tool is very specific. And the following behaviour explain
 
 This tool must be run as root, and will ask the user for a domain name, its TLD, and optionally a subdomain as per the following examples show:
 
-./qicert -d example -t net -s www
+./qicert nginx -d example -t net -s www
 
-./qicert -d example -t co.uk 
+./qicert apache -d example -t co.uk 
 
-./qicert --domain example --tld co.uk --subdomain www
+./qicert apache --domain example --tld co.uk --subdomain www
 
-Then, in the case for www.example.net it will create a configuration file for example.net in sites-availables, create a softlink, check or create a root folder in /var/www/www.example.net/public, add an ACME-challenge configuration block in the configuration file, reload nginx, spawn certbot to request a certificate, remove the ACME-challenge server block, add a simple http redirect and https configuration block for a given domain.
+Then, in the case for www.example.net it will create a configuration file for example.net in sites-availables, create a softlink, check or create a root folder in /var/www/www.example.net/public, add an ACME-challenge configuration block in the configuration file, reload the webserver, spawn certbot to request a certificate, remove the ACME-challenge server block, add a simple http redirect and https configuration block for a given domain.
 
 In the case a configuration file exists, it should create a backup, and append the server blocks mentioned in the previous paragraph.
