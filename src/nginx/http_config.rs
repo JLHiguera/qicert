@@ -24,8 +24,6 @@ impl HttpConfig {
     pub fn http_well_known(domain: &Domain) -> String {
         let server_name = Self::server_name(domain);
 
-        let root = WebRoot::build_path_string(domain);
-
         format!(
             "server {{
             listen 80;
@@ -33,7 +31,7 @@ impl HttpConfig {
             {server_name};
     
             location ^~ /.well-known/acme-challenge/ {{
-                root {root};
+                root /var/www/.well-known/challenge;
                 allow all;
                 default_type \"text/plain\";
             }}
@@ -80,7 +78,7 @@ mod test {
             server_name example.com;
     
             location ^~ /.well-known/acme-challenge/ {
-                root /var/www/example.com/public;
+                root /var/www/.well-known/challenge;
                 allow all;
                 default_type \"text/plain\";
             }
@@ -103,7 +101,7 @@ mod test {
             server_name test.example.com;
     
             location ^~ /.well-known/acme-challenge/ {
-                root /var/www/test.example.com/public;
+                root /var/www/.well-known/challenge;
                 allow all;
                 default_type \"text/plain\";
             }

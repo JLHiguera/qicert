@@ -9,11 +9,16 @@ mod configuration_file;
 mod webserver;
 use std::error::Error;
 
-//use crate::nginx::configurator::Configurator;
 use crate::domain::Domain;
 
-use apache::configurator::Configurator;
-use clap::Parser;
+use clap::{Parser, Subcommand, ValueEnum};
+
+#[derive(Debug, Clone, Copy, ValueEnum)]
+enum WebServers {
+    Apache,
+    Nginx,
+}
+
 
 #[derive(Parser)]
 #[command(name = "qicert")]
@@ -22,6 +27,8 @@ use clap::Parser;
     with nginx and manual certification in mind")]
 #[command(version, long_about = None)]
 struct Cli {
+    #[arg(value_enum)]
+    webserver: WebServers,
     #[arg(short = 'd', long)]
     domain: String,
 
@@ -39,8 +46,27 @@ fn main() -> Result<(), Box<dyn Error>> {
     let tld = cli.tld;
     let subdomain = cli.subdomain;
 
+    let webserver = cli.webserver;
+
     let domain = Domain::new(name, tld, subdomain.as_deref())?;
 
+    match webserver {
+        WebServers::Apache => handle_apache(&domain)?,
+        WebServers::Nginx => handle_nginx(&domain)?,
+    }
+
+    Ok(())
+}
+
+fn handle_apache(domain: &Domain) -> Result<(), Box<dyn Error>> {
+    use apache::configurator::Configurator;
+    Configurator::append_or_create(&domain)?;
+
+    Ok(())
+}
+
+fn handle_nginx(domain: &Domain) -> Result<(), Box<dyn Error>> {
+    use crate::nginx::configurator::Configurator;
     Configurator::append_or_create(&domain)?;
 
     Ok(())
