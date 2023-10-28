@@ -1,4 +1,4 @@
-use crate::domain::Domain;
+use crate::{domain::Domain, webroot::WebRoot};
 
 pub struct HttpConfig;
 
@@ -23,7 +23,6 @@ impl HttpConfig {
         format!("
     <VirtualHost *:80>
         {server_name}
-
         Redirect permanent / https://{domain}/
     </VirtualHost>"
         )
@@ -31,18 +30,15 @@ impl HttpConfig {
 
     pub fn https_content(domain: &Domain) -> String {
         let server_name = format!("ServerName {}", domain);
+        let root = WebRoot::build_path_string(domain);
 
         format!("
     <VirtualHost *:443>
         {server_name}
-    
+        DocumentRoot {root}
         Protocols h2 http/1.1
-    
         SSLCertificateFile /etc/letsencrypt/live/{domain}/fullchain.pem
         SSLCertificateKeyFile /etc/letsencrypt/live/{domain}/privkey.pem
-    
-        # Other Apache Configuration
-    
     </VirtualHost>"
         )
     }
@@ -117,7 +113,6 @@ mod test {
         let expected = "
     <VirtualHost *:80>
         ServerName example.com
-
         Redirect permanent / https://example.com/
     </VirtualHost>".to_string();
 
@@ -133,7 +128,6 @@ mod test {
         let expected = "
     <VirtualHost *:80>
         ServerName test.example.com
-
         Redirect permanent / https://test.example.com/
     </VirtualHost>".to_string();
 
@@ -149,7 +143,6 @@ mod test {
         let expected = "
     <VirtualHost *:80>
         ServerName test1.staging1.example.com
-
         Redirect permanent / https://test1.staging1.example.com/
     </VirtualHost>".to_string();
 
@@ -165,14 +158,10 @@ mod test {
         let expected = "
     <VirtualHost *:443>
         ServerName example.com
-    
+        DocumentRoot /var/www/example.com/public
         Protocols h2 http/1.1
-    
         SSLCertificateFile /etc/letsencrypt/live/example.com/fullchain.pem
         SSLCertificateKeyFile /etc/letsencrypt/live/example.com/privkey.pem
-    
-        # Other Apache Configuration
-    
     </VirtualHost>".to_string();
 
       let domain = Domain::new("example", "com", None).unwrap();
@@ -187,14 +176,10 @@ mod test {
         let expected = "
     <VirtualHost *:443>
         ServerName test.example.com
-    
+        DocumentRoot /var/www/test.example.com/public
         Protocols h2 http/1.1
-    
         SSLCertificateFile /etc/letsencrypt/live/test.example.com/fullchain.pem
         SSLCertificateKeyFile /etc/letsencrypt/live/test.example.com/privkey.pem
-    
-        # Other Apache Configuration
-    
     </VirtualHost>".to_string();
 
       let domain = Domain::new("example", "com", Some("test")).unwrap();
@@ -209,14 +194,10 @@ mod test {
         let expected = "
     <VirtualHost *:443>
         ServerName test1.staging1.example.com
-    
+        DocumentRoot /var/www/test1.staging1.example.com/public
         Protocols h2 http/1.1
-    
         SSLCertificateFile /etc/letsencrypt/live/test1.staging1.example.com/fullchain.pem
         SSLCertificateKeyFile /etc/letsencrypt/live/test1.staging1.example.com/privkey.pem
-    
-        # Other Apache Configuration
-    
     </VirtualHost>".to_string();
 
       let domain = Domain::new("example", "com", Some("test1.staging1")).unwrap();

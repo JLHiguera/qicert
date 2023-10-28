@@ -9,9 +9,10 @@ mod configuration_file;
 mod webserver;
 use std::error::Error;
 
-use crate::nginx::configurator::Configurator;
+//use crate::nginx::configurator::Configurator;
 use crate::domain::Domain;
 
+use apache::configurator::Configurator;
 use clap::Parser;
 
 #[derive(Parser)]

@@ -47,7 +47,7 @@ impl ConfigFile {
 pub struct ConfigFile;
 
 impl<'a> ConfigurationFile<'a> for ConfigFile {
-    const SITES_AVAILABLE: &'a str = "/etc/apache/sites-available";
+    const SITES_AVAILABLE: &'a str = "/etc/apache2/sites-available";
 
     fn server_name(domain: &Domain) -> String {
         format!("ServerName {domain}")
@@ -153,7 +153,7 @@ mod test {
     fn config_file_path_without_subdomain() {
         let domain = Domain::new_unchecked("example", "com", None);
 
-        let expected = PathBuf::from("/etc/apache/sites-available/example.com.conf");
+        let expected = PathBuf::from("/etc/apache2/sites-available/example.com.conf");
 
         let file_path = ConfigFile::file_path(&domain);
 
@@ -164,7 +164,7 @@ mod test {
     fn config_file_path_with_subdomain() {
         let domain = Domain::new_unchecked("example", "com", Some("www"));
 
-        let expected = PathBuf::from("/etc/apache/sites-available/example.com.conf");
+        let expected = PathBuf::from("/etc/apache2/sites-available/example.com.conf");
 
         let file_path = ConfigFile::file_path(&domain);
 
@@ -175,7 +175,7 @@ mod test {
     fn backup_file_path() {
         let domain = Domain::new_unchecked("example", "com", None);
 
-        let expected = PathBuf::from("/etc/apache/sites-available/example.com.conf.bak");
+        let expected = PathBuf::from("/etc/apache2/sites-available/example.com.conf.bak");
 
         let backup_path = ConfigFile::backup_path(&domain);
 
@@ -186,7 +186,7 @@ mod test {
     fn backup_file_path_with_subdomain() {
         let domain = Domain::new_unchecked("example", "com", Some("www"));
 
-        let expected = PathBuf::from("/etc/apache/sites-available/example.com.conf.bak");
+        let expected = PathBuf::from("/etc/apache2/sites-available/example.com.conf.bak");
 
         let backup_path = ConfigFile::backup_path(&domain);
 

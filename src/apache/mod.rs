@@ -32,8 +32,8 @@ impl Display for ApacheError {
 pub struct Apache;
 
 impl<'a> WebServer<'a> for Apache {
-    const WEBSERVER_BIN_PATH: &'a str = "/usr/bin/apache";
-    const BINARY_NAME: &'a str = "apache";
+    const WEBSERVER_SBIN_PATH: &'a str = "/usr/sbin/apache2";
+    const BINARY_NAME: &'a str = "apache2";
 }
 
 impl Apache {
@@ -44,8 +44,10 @@ impl Apache {
     }
 
     pub fn enable_site(domain: &Domain) -> Result<(), ApacheError> {
+        let domain = format!("{}.{}", domain.get_name(), domain.get_tld());
+
         let output = Command::new(Self::SITE_ENABLE_COMMAND)
-            .arg(domain.to_string())
+            .arg(&domain)
             .spawn()
             .and_then(Child::wait_with_output)
             .map_err(|_| ApacheError::BadConfiguration)?;
