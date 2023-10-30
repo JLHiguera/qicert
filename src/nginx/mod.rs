@@ -4,10 +4,12 @@ pub(crate) mod sites;
 pub(crate) mod configurator;
 pub(crate) mod linker;
 
-use std::{error::Error, fmt::Display, path::PathBuf, process::{Command, Child}};
+use std::{error::Error, fmt::Display, process::{Command, Child}};
+
+use crate::webserver::WebServer;
 
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum NginxError {
     CannotReload,
     BadConfiguration,
@@ -26,28 +28,20 @@ impl Display for NginxError {
     }
 }
 
+impl<'a> WebServer<'a> for Nginx {
+    const BINARY_NAME: &'a str = "nginx";
+    const WEBSERVER_SBIN_PATH: &'a str = "/usr/sbin/nginx";
+}
+
 pub struct Nginx;
 
 impl Nginx {
-    const NGINX_BIN_PATH: &str = "/usr/sbin/nginx";
-
     pub fn reload() -> Result<(), NginxError> {
-        let output = Command::new("systemctl")
-            .arg("reload")
-            .arg("nginx")
-            .spawn()
-            .and_then(Child::wait_with_output)
-            .map_err(|_| NginxError::CannotReload)?;
-
-        if !output.status.success() {
-            return Err(NginxError::CannotReload);
-        }
-
-        Ok(())
+        Self::_reload(NginxError::CannotReload)
     }
 
     pub fn check() -> Result<(), NginxError> {
-        let output = Command::new("nginx")
+        let output = Command::new(Self::BINARY_NAME)
             .arg("-t")
             .spawn()
             .and_then(Child::wait_with_output)
@@ -69,9 +63,5 @@ impl Nginx {
         Self::reload()?;
 
         Ok(())
-    }
-
-    pub fn is_installed() -> bool {
-        PathBuf::from(Self::NGINX_BIN_PATH).is_file()
     }
 }
