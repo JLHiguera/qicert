@@ -4,7 +4,7 @@ use std::{
     io::{Read, Write},
 };
 
-use crate::nginx::Nginx;
+use crate::{nginx::Nginx, configuration_file::ConfigurationFile};
 use crate::nginx::config_file::{ConfigError, ConfigFile};
 use crate::nginx::http_config::HttpConfig;
 use crate::nginx::linker::Linker;

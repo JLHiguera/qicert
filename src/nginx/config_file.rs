@@ -2,12 +2,9 @@ use std::{
     error::Error,
     fmt::Display,
     fs,
-    io::{Seek, SeekFrom},
-    path::PathBuf,
 };
 
-use crate::domain::Domain;
-use super::sites::Sites;
+use crate::{domain::Domain, configuration_file::ConfigurationFile};
 
 
 #[derive(Debug)]
@@ -33,116 +30,38 @@ impl Display for ConfigError {
 
 impl Error for ConfigError {}
 
+impl<'a> ConfigurationFile<'a> for ConfigFile {
+    const SITES_AVAILABLE: &'a str = "/etc/nginx/sites-available";
+
+    fn server_name(domain: &Domain) -> String {
+        format!("server_name {};", domain)
+    }
+}
+
 pub struct ConfigFile;
 
 impl ConfigFile {
-    pub fn find_domain_in_str<S: AsRef<str>>(haystack: S, domain: &Domain) -> bool {
-        fn inner(haystack: &str, domain: &Domain) -> bool {
-            let needle = format!("server_name {domain};");
-
-            haystack
-                .lines()
-                .map(str::trim)
-                .filter(|l| !l.contains('#'))
-                .any(|l| l.contains(needle.as_str()))
-        }
-
-        inner(haystack.as_ref(), domain)
-    }
-
-
-    fn file_path(domain: &Domain) -> PathBuf {
-        let (mut sites_available, _) = Sites::paths();
-
-        let file_name = Self::file_name(domain);
-
-        sites_available.push(file_name);
-
-        sites_available
-    }
-
-    pub fn file_name(domain: &Domain) -> String {
-        format!("{}.{}.conf", domain.get_name(), domain.get_tld())
-    }
-
     pub fn chown_to_www(domain: &Domain) -> Result<(), ConfigError> {
-        use std::process::Command;
-
-        let conf_file_path = Self::file_path(domain);
-
-        if !conf_file_path.exists() {
-            return Err(ConfigError::FileSaving);
-        }
-
-        Command::new("chown")
-            .arg("www-data:www-data")
-            .arg(conf_file_path)
-            .spawn()
-            .and_then(|mut p| p.wait())
-            .map_err(|_| ConfigError::FileSaving)?;
-
-        Ok(())
-    }
-
-    pub fn file_exists(domain: &Domain) -> bool {
-        let conf_path = Self::file_path(domain);
-
-        conf_path.exists() || conf_path.is_file()
+        Self::_chown_to_www(domain, ConfigError::FileSaving)
     }
 
     pub fn create(domain: &Domain) -> Result<fs::File, ConfigError> {
-        if Self::file_exists(domain) {
-            return Err(ConfigError::FileExists);
-        }
-
-        let conf_path = Self::file_path(domain);
-
-        let file = fs::File::create(conf_path).map_err(|_| ConfigError::FileSaving)?;
-
-        Ok(file)
+        Self::_create(domain, ConfigError::FileExists, ConfigError::FileSaving)
     }
 
     pub fn create_backup(domain: &Domain) -> Result<(), ConfigError> {
-        let file_path = Self::file_path(domain);
-
-        let backup_path = Self::backup_path(domain);
-
-        std::fs::copy(file_path, backup_path).map_err(|_| ConfigError::FileSaving)?;
-
-        Ok(())
-    }
-
-    fn backup_path(domain: &Domain) -> PathBuf {
-        let file_path = Self::file_path(domain);
-
-        file_path.with_extension("conf.bak")
-    }
-
-
-    pub fn truncate_file(file: &mut fs::File) -> Result<(), Box<dyn Error>> {
-        file.set_len(0)?;
-
-        file.seek(SeekFrom::End(0))?;
-
-        Ok(())
+        Self::_create_backup(domain, ConfigError::FileSaving)
     }
 
     pub fn append(domain: &Domain) -> Result<fs::File, ConfigError> {
-        let conf_path = Self::file_path(domain);
-
-        let file = fs::OpenOptions::new()
-            .append(true)
-            .read(true)
-            .open(conf_path)
-            .map_err(|_| ConfigError::InvalidPath)?;
-
-        Ok(file)
+        Self::_append(domain, ConfigError::InvalidPath)
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+    use std::path::PathBuf;
 
     #[test]
     fn find_domain_without_subdomain_file() {
