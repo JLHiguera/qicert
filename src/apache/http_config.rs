@@ -4,7 +4,7 @@ pub struct HttpConfig;
 
 impl HttpConfig {
     pub fn http_well_known(domain: &Domain) -> String {
-        let server_name = format!("ServerName {}", domain);
+        let server_name = format!("ServerName {domain}");
 
         format!(
             "
@@ -19,7 +19,7 @@ impl HttpConfig {
     }
 
     pub fn http_redirect(domain: &Domain) -> String {
-        let server_name = format!("ServerName {}", domain);
+        let server_name = format!("ServerName {domain}");
 
         format!(
             "
@@ -31,7 +31,7 @@ impl HttpConfig {
     }
 
     pub fn https_content(domain: &Domain) -> String {
-        let server_name = format!("ServerName {}", domain);
+        let server_name = format!("ServerName {domain}");
         let root = WebRoot::build_path_string(domain);
 
         format!(

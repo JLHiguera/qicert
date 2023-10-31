@@ -24,7 +24,7 @@ impl Configurator {
         ConfigFile::chown_to_www(domain)?;
 
         let message = match Linker::create(domain) {
-            Ok(_) => "Link created",
+            Ok(()) => "Link created",
             Err(ConfigError::SymlinkExists) => "Link exists. Skipping",
             Err(ConfigError::Linking) => "Missing permissions",
             _ => panic!("Unexpected error!"),
@@ -120,7 +120,7 @@ impl Configurator {
             Self::add_well_known(&mut file, domain)?;
 
             match WebRoot::create_and_set_chown(domain) {
-                Ok(_) => println!("Webroot created for {domain}"),
+                Ok(()) => println!("Webroot created for {domain}"),
                 Err(e) => println!("{e} error for {domain}"),
             };
 

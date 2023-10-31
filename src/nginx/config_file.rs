@@ -29,7 +29,7 @@ impl<'a> ConfigurationFile<'a> for ConfigFile {
     const SITES_AVAILABLE: &'a str = "/etc/nginx/sites-available";
 
     fn server_name(domain: &Domain) -> String {
-        format!("server_name {};", domain)
+        format!("server_name {domain};")
     }
 }
 

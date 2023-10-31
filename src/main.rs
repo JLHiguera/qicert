@@ -57,14 +57,14 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 fn handle_apache(domain: &Domain) -> Result<(), Box<dyn Error>> {
     use apache::configurator::Configurator;
-    Configurator::append_or_create(&domain)?;
+    Configurator::append_or_create(domain)?;
 
     Ok(())
 }
 
 fn handle_nginx(domain: &Domain) -> Result<(), Box<dyn Error>> {
     use crate::nginx::configurator::Configurator;
-    Configurator::append_or_create(&domain)?;
+    Configurator::append_or_create(domain)?;
 
     Ok(())
 }

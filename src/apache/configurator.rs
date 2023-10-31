@@ -113,7 +113,7 @@ impl Configurator {
         if !ConfigFile::find_domain_in_str(content_backup.as_str(), domain) {
             Self::add_well_known(&mut file, domain)?;
             match WebRoot::create_and_set_chown(domain) {
-                Ok(_) => println!("Webroot created for {domain}"),
+                Ok(()) => println!("Webroot created for {domain}"),
                 Err(e) => println!("{e} error for {domain}"),
             };
 
