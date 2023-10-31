@@ -1,4 +1,8 @@
-use std::{error::Error, path::PathBuf, process::{Child, Command}};
+use std::{
+    error::Error,
+    path::PathBuf,
+    process::{Child, Command},
+};
 
 pub(crate) trait WebServer<'a> {
     const WEBSERVER_SBIN_PATH: &'a str;

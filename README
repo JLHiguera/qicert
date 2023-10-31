@@ -1,4 +1,4 @@
-As of version 0.3.0, this tool only works under Linux and depends on Nginx or Apache and Certbot.
+This tool only works under Linux and depends on Nginx or Apache and Certbot.
 
 WARNING:
 READ THE CODE BEFORE RUNNING OR BUILDING

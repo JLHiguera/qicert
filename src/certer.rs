@@ -2,10 +2,10 @@ use std::{
     error::Error,
     fmt::Display,
     path::PathBuf,
-    process::{Command, Stdio, Child},
+    process::{Child, Command, Stdio},
 };
 
-use crate::{domain::Domain, webroot::WebRoot};
+use crate::domain::Domain;
 
 #[derive(Debug)]
 pub enum CertBotError {
@@ -38,13 +38,10 @@ impl Certer {
             return Err(CertBotError::NotInstalled);
         }
 
-        let root = WebRoot::build_path_string(domain);
-
         Command::new("certbot")
             .arg("certonly")
             .arg("--webroot")
             .arg("-w")
-            //.arg(root.as_str())
             .arg("/var/www/.well-known/challenge")
             .arg("-d")
             .arg(domain.to_string().as_str())

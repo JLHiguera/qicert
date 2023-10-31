@@ -40,7 +40,7 @@ impl FromStr for Tld {
         let value = value.to_lowercase();
 
         if value.is_empty() {
-            return Err(Self::Err::MissingTld)
+            return Err(Self::Err::MissingTld);
         }
 
         if value.len() < 2 {

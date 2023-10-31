@@ -1,24 +1,23 @@
 #![cfg(unix)]
 
+mod apache;
 mod certer;
+mod configuration_file;
 mod domain;
 mod nginx;
 mod webroot;
-mod apache;
-mod configuration_file;
 mod webserver;
 use std::error::Error;
 
 use crate::domain::Domain;
 
-use clap::{Parser, Subcommand, ValueEnum};
+use clap::{Parser, ValueEnum};
 
 #[derive(Debug, Clone, Copy, ValueEnum)]
 enum WebServers {
     Apache,
     Nginx,
 }
-
 
 #[derive(Parser)]
 #[command(name = "qicert")]
@@ -46,11 +45,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     let tld = cli.tld;
     let subdomain = cli.subdomain;
 
-    let webserver = cli.webserver;
-
     let domain = Domain::new(name, tld, subdomain.as_deref())?;
 
-    match webserver {
+    match cli.webserver {
         WebServers::Apache => handle_apache(&domain)?,
         WebServers::Nginx => handle_nginx(&domain)?,
     }

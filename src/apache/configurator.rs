@@ -1,8 +1,15 @@
-use std::{error::Error, fs::File, io::{Write, Read}};
+use std::{
+    error::Error,
+    fs::File,
+    io::{Read, Write},
+};
 
-use crate::{certer::Certer, domain::Domain, configuration_file::ConfigurationFile, apache::config_file::ConfigError, webserver::WebServer, webroot::WebRoot};
+use crate::{
+    apache::config_file::ConfigError, certer::Certer, configuration_file::ConfigurationFile,
+    domain::Domain, webroot::WebRoot, webserver::WebServer,
+};
 
-use super::{Apache, config_file::ConfigFile, http_config::HttpConfig};
+use super::{config_file::ConfigFile, http_config::HttpConfig, Apache};
 
 pub struct Configurator;
 
@@ -34,7 +41,7 @@ impl Configurator {
         let file = ConfigFile::create(domain)?;
 
         ConfigFile::chown_to_www(domain)?;
-        
+
         Ok(file)
     }
 
@@ -102,7 +109,6 @@ impl Configurator {
 
             tmp
         };
-
 
         if !ConfigFile::find_domain_in_str(content_backup.as_str(), domain) {
             Self::add_well_known(&mut file, domain)?;

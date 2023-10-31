@@ -1,14 +1,12 @@
-use std::{fmt::Display, error::Error};
-use std::process::{Command, Child};
-
+use std::process::{Child, Command};
+use std::{error::Error, fmt::Display};
 
 use crate::domain::Domain;
 use crate::webserver::WebServer;
 
-
-pub(crate) mod http_config;
 pub(crate) mod config_file;
 pub(crate) mod configurator;
+pub(crate) mod http_config;
 
 #[derive(Debug, Copy, Clone)]
 pub enum ApacheError {
@@ -51,7 +49,6 @@ impl Apache {
             .spawn()
             .and_then(Child::wait_with_output)
             .map_err(|_| ApacheError::BadConfiguration)?;
-
 
         if !output.status.success() {
             return Err(ApacheError::BadConfiguration);

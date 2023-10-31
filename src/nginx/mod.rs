@@ -1,13 +1,16 @@
 pub mod config_file;
-pub mod http_config;
-pub(crate) mod sites;
 pub(crate) mod configurator;
+pub mod http_config;
 pub(crate) mod linker;
+pub(crate) mod sites;
 
-use std::{error::Error, fmt::Display, process::{Command, Child}};
+use std::{
+    error::Error,
+    fmt::Display,
+    process::{Child, Command},
+};
 
 use crate::webserver::WebServer;
-
 
 #[derive(Debug, Clone, Copy)]
 pub enum NginxError {

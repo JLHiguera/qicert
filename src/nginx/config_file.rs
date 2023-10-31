@@ -1,11 +1,6 @@
-use std::{
-    error::Error,
-    fmt::Display,
-    fs,
-};
+use std::{error::Error, fmt::Display, fs};
 
-use crate::{domain::Domain, configuration_file::ConfigurationFile};
-
+use crate::{configuration_file::ConfigurationFile, domain::Domain};
 
 #[derive(Debug)]
 pub enum ConfigError {
@@ -19,12 +14,12 @@ pub enum ConfigError {
 impl Display for ConfigError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Linking => write!(f,"Configuration file could not be soft linked"),
-            Self::FileSaving => write!(f,"Configuration file could not be written to disk"),
-            Self::InvalidPath => write!(f,"An invalid path was given for a configuration file"),
-            Self::SymlinkExists => write!(f,"Symlink already exists"),
-            Self::FileExists => write!(f,"Configuration file already exists"),
-        }    
+            Self::Linking => write!(f, "Configuration file could not be soft linked"),
+            Self::FileSaving => write!(f, "Configuration file could not be written to disk"),
+            Self::InvalidPath => write!(f, "An invalid path was given for a configuration file"),
+            Self::SymlinkExists => write!(f, "Symlink already exists"),
+            Self::FileExists => write!(f, "Configuration file already exists"),
+        }
     }
 }
 

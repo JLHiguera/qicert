@@ -82,7 +82,8 @@ mod test {
                 allow all;
                 default_type \"text/plain\";
             }
-    }".to_string();
+    }"
+        .to_string();
 
         let domain = Domain::new("example", "com", None);
 
@@ -105,7 +106,8 @@ mod test {
                 allow all;
                 default_type \"text/plain\";
             }
-    }".to_string();
+    }"
+        .to_string();
 
         let domain = Domain::new("example", "com", Some("test"));
 
@@ -134,7 +136,8 @@ mod test {
             location / {
                 try_files $uri $uri/ =404;
             }
-    }"##.to_string();
+    }"##
+        .to_string();
 
         let domain = Domain::new("example", "com", None);
 
@@ -163,7 +166,8 @@ mod test {
             location / {
                 try_files $uri $uri/ =404;
             }
-    }"##.to_string();
+    }"##
+        .to_string();
 
         //let domain = Domain::try_from("www.example.com").unwrap();
         let domain = Domain::new("example", "com", Some("www"));
@@ -183,7 +187,8 @@ mod test {
             server_name example.com;
     
             return 301 https://example.com$request_uri;
-    }".to_string();
+    }"
+        .to_string();
 
         let domain = Domain::new("example", "com", None);
 
@@ -202,7 +207,8 @@ mod test {
             server_name www.example.com;
     
             return 301 https://www.example.com$request_uri;
-    }".to_string();
+    }"
+        .to_string();
 
         let domain = Domain::new("example", "com", Some("www"));
 

@@ -1,6 +1,6 @@
-use std::{path::PathBuf, error::Error, fmt::Display, fs::File};
+use std::{error::Error, fmt::Display, fs::File};
 
-use crate::{domain::Domain, configuration_file::ConfigurationFile};
+use crate::{configuration_file::ConfigurationFile, domain::Domain};
 
 #[derive(Debug)]
 pub enum ConfigError {
@@ -12,15 +12,17 @@ pub enum ConfigError {
 impl Display for ConfigError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::FileSaving => write!(f,"Apache Configuration file could not be written to disk"),
-            Self::InvalidPath => write!(f,"An invalid path was given for an Apache configuration file"),
-            Self::FileExists => write!(f,"Apache configuration file already exists"),
-        }    
+            Self::FileSaving => write!(f, "Apache Configuration file could not be written to disk"),
+            Self::InvalidPath => write!(
+                f,
+                "An invalid path was given for an Apache configuration file"
+            ),
+            Self::FileExists => write!(f, "Apache configuration file already exists"),
+        }
     }
 }
 
 impl Error for ConfigError {}
-
 
 impl ConfigFile {
     pub fn chown_to_www(domain: &Domain) -> Result<(), ConfigError> {
@@ -28,11 +30,7 @@ impl ConfigFile {
     }
 
     pub fn create(domain: &Domain) -> Result<File, ConfigError> {
-        Self::_create(
-            domain,
-            ConfigError::FileExists,
-            ConfigError::FileSaving,
-        )
+        Self::_create(domain, ConfigError::FileExists, ConfigError::FileSaving)
     }
 
     pub fn create_backup(domain: &Domain) -> Result<(), ConfigError> {
@@ -53,7 +51,6 @@ impl<'a> ConfigurationFile<'a> for ConfigFile {
         format!("ServerName {domain}")
     }
 }
-
 
 #[cfg(test)]
 mod test {

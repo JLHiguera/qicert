@@ -4,16 +4,12 @@ use std::{
     io::{Read, Write},
 };
 
-use crate::{nginx::Nginx, configuration_file::ConfigurationFile, webserver::WebServer};
 use crate::nginx::config_file::{ConfigError, ConfigFile};
 use crate::nginx::http_config::HttpConfig;
 use crate::nginx::linker::Linker;
+use crate::{configuration_file::ConfigurationFile, nginx::Nginx, webserver::WebServer};
 
-use crate::{
-    certer::Certer,
-    domain::Domain,
-    webroot::WebRoot,
-};
+use crate::{certer::Certer, domain::Domain, webroot::WebRoot};
 
 pub struct Configurator;
 

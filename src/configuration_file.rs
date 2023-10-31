@@ -1,4 +1,4 @@
-use std::{path::PathBuf, error::Error, fs::File, io::SeekFrom};
+use std::{error::Error, fs::File, io::SeekFrom, path::PathBuf};
 
 use crate::domain::Domain;
 
@@ -14,7 +14,7 @@ pub(crate) trait ConfigurationFile<'a> {
             .lines()
             .map(str::trim)
             .filter(|l| !l.contains('#'))
-            .any(|l| l.ends_with(&needle))        
+            .any(|l| l.ends_with(&needle))
     }
 
     fn sites_enabled_path() -> PathBuf {
@@ -77,7 +77,7 @@ pub(crate) trait ConfigurationFile<'a> {
     }
 
     fn _create_backup<E: Error>(domain: &Domain, saving_err: E) -> Result<(), E> {
-        let file_path = Self::file_path(domain);        
+        let file_path = Self::file_path(domain);
         let backup_path = Self::backup_path(domain);
 
         std::fs::copy(file_path, backup_path).map_err(|_| saving_err)?;
@@ -89,7 +89,7 @@ pub(crate) trait ConfigurationFile<'a> {
         use std::io::Seek;
 
         file.set_len(0)?;
-        
+
         file.seek(SeekFrom::End(0))?;
 
         Ok(())
@@ -106,6 +106,6 @@ pub(crate) trait ConfigurationFile<'a> {
 
         Ok(file)
     }
-    
+
     fn server_name(domain: &Domain) -> String;
 }
